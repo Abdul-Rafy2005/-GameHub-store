@@ -1,0 +1,38 @@
+﻿@model IEnumerable<GameHub.Models.Genre>
+
+@{
+    ViewBag.Title = "Genres";
+}
+
+<div class="page-header">
+    <h2>Genres</h2>
+</div>
+
+<div class="toolbar">
+    <div>
+        @Html.ActionLink("Create New Genre", "Create", null, new { @class = "btn btn-success" })
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.FirstOrDefault().GenreName)</th>
+                <th class="text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model) {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.GenreName)</td>
+                <td class="text-right actions-col">
+                    @Html.ActionLink("Edit", "Edit", new { id=item.GenreID }, new { @class = "btn btn-primary btn-xs" })
+                    @Html.ActionLink("Details", "Details", new { id=item.GenreID }, new { @class = "btn btn-default btn-xs" })
+                    @Html.ActionLink("Delete", "Delete", new { id=item.GenreID }, new { @class = "btn btn-danger btn-xs" })
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

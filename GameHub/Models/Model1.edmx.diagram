@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="e90ab45bcc55483cb3988b032581c421" Name="Diagram1" ZoomLevel="64">
+        <EntityTypeShape EntityType="GameManagementMISModel.BackupLog" Width="1.5" PointX="7.75" PointY="0.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="GameManagementMISModel.Discount" Width="1.5" PointX="0.75" PointY="4.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="GameManagementMISModel.GameFeedback" Width="1.5" PointX="5.25" PointY="4.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="GameManagementMISModel.Game" Width="1.5" PointX="3" PointY="4.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="GameManagementMISModel.Genre" Width="1.5" PointX="0.75" PointY="2.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="GameManagementMISModel.Transaction" Width="1.5" PointX="8.25" PointY="4.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="GameManagementMISModel.UserLibrary" Width="1.5" PointX="5.25" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="GameManagementMISModel.User" Width="1.5" PointX="3" PointY="8.625" IsExpanded="true" />
+        <AssociationConnector Association="GameManagementMISModel.FK__GameFeedb__GameI__286302EC" ManuallyRouted="false" />
+        <AssociationConnector Association="GameManagementMISModel.FK__GameFeedb__UserI__276EDEB3" ManuallyRouted="false" />
+        <AssociationConnector Association="GameManagementMISModel.FK__Games__GenreID__2C3393D0" ManuallyRouted="false" />
+        <AssociationConnector Association="GameManagementMISModel.FK__Transacti__GameI__1CF15040" ManuallyRouted="false" />
+        <AssociationConnector Association="GameManagementMISModel.FK__UserLibra__GameI__22AA2996" ManuallyRouted="false" />
+        <AssociationConnector Association="GameManagementMISModel.FK__Transacti__UserI__1BFD2C07" ManuallyRouted="false" />
+        <AssociationConnector Association="GameManagementMISModel.FK__UserLibra__UserI__21B6055D" ManuallyRouted="false" />
+        <AssociationConnector Association="GameManagementMISModel.GameDiscounts" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

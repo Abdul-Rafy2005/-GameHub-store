@@ -1,0 +1,142 @@
+﻿@model GameHub.Models.Discount
+@{
+    ViewBag.Title = "Create Discount";
+    var games = ViewBag.Games as IEnumerable<GameHub.Models.Game> ?? new List<GameHub.Models.Game>();
+}
+
+<div class="hero-banner" style="background-image:url('/Content/hero-placeholder.jpg')">
+    <div class="overlay">
+        <h1 class="display-6"><i class="bi bi-plus-circle"></i> Create Discount Code</h1>
+        <p class="lead">Set up a new promotional discount</p>
+    </div>
+</div>
+
+<div class="panel-dark p-4">
+    @using (Html.BeginForm("Create", "Discounts", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Discount Code *</label>
+                    @Html.TextBoxFor(model => model.DiscountName, new { @class = "form-control form-control-dark", required = "required", placeholder = "e.g., SUMMER2024" })
+                    @Html.ValidationMessageFor(model => model.DiscountName, "", new { @class = "text-danger" })
+                    <small class="text-muted">Users will enter this code at checkout</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Discount Percentage *</label>
+                    @Html.TextBoxFor(model => model.DiscountPercent, new { @class = "form-control form-control-dark", type = "number", step = "1", min = "1", max = "100", required = "required", placeholder = "e.g., 20" })
+                    @Html.ValidationMessageFor(model => model.DiscountPercent, "", new { @class = "text-danger" })
+                    <small class="text-muted">Enter percentage (1-100)</small>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Start Date</label>
+                        @Html.TextBoxFor(model => model.StartDate, new { @class = "form-control form-control-dark", type = "datetime-local" })
+                        @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger" })
+                        <small class="text-muted">Leave blank for immediate activation</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">End Date</label>
+                        @Html.TextBoxFor(model => model.EndDate, new { @class = "form-control form-control-dark", type = "datetime-local" })
+                        @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger" })
+                        <small class="text-muted">Leave blank for no expiration</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Applicable Games * <span id="selectedCount" class="badge bg-info ms-2">0 selected</span></label>
+                    <div class="game-selection-box">
+                        <div class="mb-2 d-flex gap-2">
+                            <input type="text" id="gameSearchInput" class="form-control form-control-dark form-control-sm" placeholder="Search games..." />
+                            <button type="button" class="btn btn-sm btn-secondary" id="selectAllBtn">Select All</button>
+                            <button type="button" class="btn btn-sm btn-secondary" id="clearAllBtn">Clear All</button>
+                        </div>
+                        <div class="game-list" id="gameList">
+                            @foreach (var game in games)
+                            {
+                                <div class="form-check game-item" data-title="@game.Title.ToLower()">
+                                    <input class="form-check-input game-checkbox" type="checkbox" name="selectedGames" value="@game.GameID" id="game_@game.GameID" />
+                                    <label class="form-check-label" for="game_@game.GameID">
+                                        @game.Title <span class="text-muted small">($@game.Price)</span>
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <small class="text-muted">Select games this discount applies to</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-accent btn-lg"><i class="bi bi-check-circle"></i> Create Discount</button>
+            <a href="@Url.Action("Index")" class="btn btn-secondary btn-lg ms-2"><i class="bi bi-x-circle"></i> Cancel</a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+$(document).ready(function(){
+    // Update selected count
+    function updateCount(){
+        var count = $('.game-checkbox:checked').length;
+        $('#selectedCount').text(count + ' selected');
+    }
+
+    // Game search filter
+    $('#gameSearchInput').on('input', function(){
+        var searchTerm = $(this).val().toLowerCase();
+        $('.game-item').each(function(){
+            var title = $(this).data('title');
+            if(title.indexOf(searchTerm) >= 0){
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
+
+    // Select all visible games
+    $('#selectAllBtn').on('click', function(){
+        $('.game-item:visible .game-checkbox').prop('checked', true);
+        updateCount();
+    });
+
+    // Clear all selections
+    $('#clearAllBtn').on('click', function(){
+        $('.game-checkbox').prop('checked', false);
+        updateCount();
+    });
+
+    // Update count on checkbox change
+    $('.game-checkbox').on('change', updateCount);
+
+    // Initial count
+    updateCount();
+});
+</script>
+}
+
+@section Styles {
+<style>
+.game-selection-box { background:rgba(10,15,20,.6); border:1px solid rgba(255,255,255,.1); border-radius:8px; padding:12px; }
+.game-list { max-height:400px; overflow-y:auto; }
+.game-item { padding:8px 12px; border-radius:6px; transition:.2s; margin-bottom:4px; border:1px solid transparent; cursor:pointer; }
+.game-item:hover { background:rgba(102,192,244,.15); border-color:rgba(102,192,244,.3); }
+.game-item input[type="checkbox"]:checked ~ label { font-weight:700; color:#66c0f4; }
+.game-item:has(input[type="checkbox"]:checked) { background:rgba(102,192,244,.25); border-color:#66c0f4; box-shadow:0 2px 8px rgba(102,192,244,.3); }
+.game-list::-webkit-scrollbar { width:8px; }
+.game-list::-webkit-scrollbar-track { background:rgba(0,0,0,.2); }
+.game-list::-webkit-scrollbar-thumb { background:rgba(102,192,244,.3); border-radius:4px; }
+.form-check-input:checked { background-color:#66c0f4; border-color:#66c0f4; }
+.game-item label { cursor:pointer; margin-bottom:0; width:100%; }
+</style>
+}

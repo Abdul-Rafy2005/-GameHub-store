@@ -1,0 +1,77 @@
+@{
+    ViewBag.Title = "Database Diagnostics";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="panel-dark">
+    <h2><i class="bi bi-gear"></i> Database Diagnostics</h2>
+    
+    <div class="mt-4">
+        <h4>Connection Status</h4>
+        <div class="alert @(ViewBag.DatabaseStatus.ToString().Contains("Connected") ? "alert-success" : "alert-danger")">
+            <strong>@ViewBag.DatabaseStatus</strong>
+        </div>
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="mt-4">
+            <h4>Error Details</h4>
+            <div class="alert alert-danger">
+                <pre style="white-space: pre-wrap; word-wrap: break-word;">@ViewBag.Error</pre>
+            </div>
+        </div>
+    }
+
+    <div class="mt-4">
+        <h4>Connection String</h4>
+        <div class="panel-dark" style="background: #0a0d10;">
+            <code style="color: #66c0f4; word-break: break-all;">@ViewBag.ConnectionString</code>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h4>Database Statistics</h4>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="panel-dark text-center">
+                    <i class="bi bi-controller fs-1 text-info"></i>
+                    <h3 class="mt-2">@ViewBag.GamesCount</h3>
+                    <p class="text-muted mb-0">Games</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="panel-dark text-center">
+                    <i class="bi bi-tag fs-1 text-success"></i>
+                    <h3 class="mt-2">@ViewBag.GenresCount</h3>
+                    <p class="text-muted mb-0">Genres</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="panel-dark text-center">
+                    <i class="bi bi-people fs-1 text-warning"></i>
+                    <h3 class="mt-2">@ViewBag.UsersCount</h3>
+                    <p class="text-muted mb-0">Users</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h4>Common Issues & Solutions</h4>
+        <div class="panel-dark">
+            <ol>
+                <li><strong>SQL Server not running:</strong> Start SQL Server service from Services or SQL Server Configuration Manager</li>
+                <li><strong>Wrong server name:</strong> Check your SQL Server instance name in SQL Server Management Studio</li>
+                <li><strong>Database doesn't exist:</strong> Create the database or update connection string</li>
+                <li><strong>Authentication failed:</strong> Verify Windows Authentication or SQL Server credentials</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h4>Quick Actions</h4>
+        <a href="@Url.Action("Index","Games")" class="btn btn-accent">Try Loading Store Again</a>
+        <a href="@Url.Action("Index","Admin")" class="btn btn-secondary">Go to Admin Dashboard</a>
+    </div>
+</div>

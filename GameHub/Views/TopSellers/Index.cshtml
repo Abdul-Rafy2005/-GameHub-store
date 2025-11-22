@@ -1,0 +1,142 @@
+@model IEnumerable<GameHub.Models.Game>
+@{
+    ViewBag.Title = "Top Sellers";
+    var isAuth = (Session["IsAuthenticated"] as bool?) ?? false;
+    var isAdmin = ((Session["UserType"] as string) ?? "").Equals("Admin", StringComparison.OrdinalIgnoreCase);
+    var userLibrary = ViewBag.UserLibrary as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var salesData = ViewBag.SalesData as Dictionary<int, int> ?? new Dictionary<int, int>();
+    var gamesList = Model?.ToList() ?? new List<GameHub.Models.Game>();
+}
+
+<div class="hero-banner" style="background-image:url('/Content/hero-placeholder.jpg')">
+    <div class="overlay">
+        <h1 class="display-6"><i class="bi bi-trophy"></i> Top Sellers</h1>
+        <p class="lead">Most popular games based on sales</p>
+    </div>
+</div>
+
+@if (!gamesList.Any())
+{
+    <div class="panel-dark text-center py-5">
+        <i class="bi bi-inbox display-1 text-muted"></i>
+        <h3 class="mt-3">No Top Sellers Yet</h3>
+        <p class="text-muted">Games will appear here once users start purchasing!</p>
+        <a href="@Url.Action("Index","Games")" class="btn btn-accent mt-3">Browse All Games</a>
+    </div>
+}
+else
+{
+    <div class="games-grid">
+        @for (int i = 0; i < gamesList.Count; i++)
+        {
+            var game = gamesList[i];
+            var status = userLibrary.ContainsKey(game.GameID) ? userLibrary[game.GameID] : "none";
+            var sales = salesData.ContainsKey(game.GameID) ? salesData[game.GameID] : 0;
+            var rank = i + 1;
+            <div class="game-card">
+                <div class="rank-badge">#@rank</div>
+                <img src="/Content/covers/@(game.GameID).jpg" class="cover" alt="@game.Title" onerror="this.src='/Content/cover-placeholder.jpg'" />
+                <div class="game-card-body">
+                    <div class="game-title">@game.Title</div>
+                    <div class="badges">
+                        <span class="badge badge-soft">@(game.Genre1?.GenreName ?? "General")</span>
+                        <span class="badge bg-warning text-dark">@sales Sales</span>
+                    </div>
+                    <div class="game-price mt-2 mb-2">$@game.Price</div>
+                    <div class="actions">
+                        <div>
+                            @if (!isAdmin)
+                            {
+                                if (status == "owned")
+                                {
+                                    <button class="btn btn-success btn-sm" disabled>
+                                        <i class="bi bi-check-circle"></i> Owned
+                                    </button>
+                                }
+                                else if (status == "wishlist")
+                                {
+                                    <button class="btn btn-info btn-sm" disabled>
+                                        <i class="bi bi-bookmark-check"></i> In Wishlist
+                                    </button>
+                                }
+                                else
+                                {
+                                    if (isAuth)
+                                    {
+                                        using (Html.BeginForm("AddToLibrary", "Games", FormMethod.Post, new { @class = "d-inline library-form" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            @Html.Hidden("gameId", game.GameID)
+                                            <button type="submit" class="btn btn-accent btn-sm">
+                                                <i class="bi bi-plus-circle"></i> Add to Wishlist
+                                            </button>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-accent btn-sm" onclick="requireLogin()">
+                                            <i class="bi bi-plus-circle"></i> Add to Wishlist
+                                        </button>
+                                    }
+                                }
+                                <a href="@Url.Action("Details","Games", new { id = game.GameID })" class="btn btn-secondary btn-sm">Details</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+<script>
+$(document).ready(function() {
+    $('.library-form').on('submit', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        var btn = form.find('button[type="submit"]');
+        
+        btn.prop('disabled', true).html('<i class="bi bi-hourglass-split"></i> Adding...');
+        
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    form.replaceWith('<button class="btn btn-info btn-sm" disabled><i class="bi bi-bookmark-check"></i> In Wishlist</button>');
+                    showToast(response.message || 'Added to wishlist!', 'success');
+                } else {
+                    showToast(response.message || 'Failed to add to wishlist.', 'error');
+                    btn.prop('disabled', false).html('<i class="bi bi-plus-circle"></i> Add to Wishlist');
+                }
+            },
+            error: function() {
+                showToast('Failed to add to wishlist. Please try again.', 'error');
+                btn.prop('disabled', false).html('<i class="bi bi-plus-circle"></i> Add to Wishlist');
+            }
+        });
+    });
+});
+</script>
+}
+
+@section Styles {
+<style>
+.rank-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 8px 12px;
+    border-radius: 50%;
+    z-index: 10;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+</style>
+}

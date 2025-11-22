@@ -1,0 +1,81 @@
+@{ 
+    var genres = ViewBag.Genres as SelectList ?? new SelectList(new List<string>()); 
+    var genresItems = ViewBag.GenresItems as IEnumerable<GameHub.Models.Genre> ?? new List<GameHub.Models.Genre>();
+}
+<div class="list-group genre-filter mb-3">
+    <a class="list-group-item list-group-item-action" href="@Url.Action("Index","Games")">All Genres</a>
+    @foreach (var g in genresItems)
+    {
+        <a class="list-group-item list-group-item-action" href="@Url.Action("Index","Games", new { genreFilter = g.GenreID, searchTerm = ViewBag.SearchTerm, minPrice = Request["minPrice"], maxPrice = Request["maxPrice"], freeOnly = Request["freeOnly"] })">@g.GenreName</a>
+    }
+</div>
+
+<style>
+.price-range-toggle { cursor:pointer; }
+.price-range-panel { background:rgba(10,15,20,.8); border:1px solid rgba(255,255,255,.05); border-top:none; animation:slideDown .2s ease; }
+@@keyframes slideDown { from { opacity:0; max-height:0; } to { opacity:1; max-height:200px; } }
+.toggle-icon { transition:.2s; }
+</style>
+
+<div class="list-group genre-filter">
+    <!-- Free link - instant filter -->
+    <a href="@Url.Action("Index","Games", new { genreFilter = ViewBag.GenreFilter, searchTerm = ViewBag.SearchTerm, freeOnly = "true" })" 
+       class="list-group-item list-group-item-action @(Request["freeOnly"] == "true" ? "active" : "")">
+        Free
+    </a>
+
+    <!-- Range toggle -->
+    <div class="list-group-item list-group-item-action price-range-toggle @((!string.IsNullOrEmpty(Request["minPrice"]) || !string.IsNullOrEmpty(Request["maxPrice"])) ? "active" : "")" id="priceRangeToggle">
+        Price Range
+        <i class="bi bi-chevron-down float-end toggle-icon"></i>
+    </div>
+
+    <!-- Range form - collapsible -->
+    <div id="priceRangePanel" class="price-range-panel" style="display:@((!string.IsNullOrEmpty(Request["minPrice"]) || !string.IsNullOrEmpty(Request["maxPrice"])) ? "block" : "none")">
+        @using (Html.BeginForm("Index", "Games", FormMethod.Get, new { @class = "p-2" }))
+        {
+            <input type="hidden" name="genreFilter" value="@ViewBag.GenreFilter" />
+            <input type="hidden" name="searchTerm" value="@ViewBag.SearchTerm" />
+            <div class="row g-2 mb-2">
+                <div class="col-6">
+                    <input type="number" step="0.01" min="0" class="form-control form-control-dark form-control-sm" name="minPrice" placeholder="Min" value="@Request["minPrice"]" />
+                </div>
+                <div class="col-6">
+                    <input type="number" step="0.01" min="0" class="form-control form-control-dark form-control-sm" name="maxPrice" placeholder="Max" value="@Request["maxPrice"]" />
+                </div>
+            </div>
+            <button type="submit" class="btn btn-accent btn-sm w-100"><i class="bi bi-funnel"></i> Apply</button>
+        }
+    </div>
+
+    <!-- Clear filters link -->
+    @if (Request["freeOnly"] == "true" || !string.IsNullOrEmpty(Request["minPrice"]) || !string.IsNullOrEmpty(Request["maxPrice"]))
+    {
+        <a href="@Url.Action("Index","Games", new { genreFilter = ViewBag.GenreFilter, searchTerm = ViewBag.SearchTerm })" class="list-group-item list-group-item-action text-danger">
+            <i class="bi bi-x-circle"></i> Clear Price Filter
+        </a>
+    }
+</div>
+
+<script>
+(function(){
+    var toggle = document.getElementById('priceRangeToggle');
+    var panel = document.getElementById('priceRangePanel');
+    var icon = toggle ? toggle.querySelector('.toggle-icon') : null;
+    
+    if(toggle && panel && icon){
+        toggle.addEventListener('click', function(e){
+            e.preventDefault();
+            if(panel.style.display === 'none' || panel.style.display === ''){
+                panel.style.display = 'block';
+                icon.classList.remove('bi-chevron-down');
+                icon.classList.add('bi-chevron-up');
+            } else {
+                panel.style.display = 'none';
+                icon.classList.remove('bi-chevron-up');
+                icon.classList.add('bi-chevron-down');
+            }
+        });
+    }
+})();
+</script>

@@ -1,0 +1,283 @@
+﻿/** --- Contrast Improvements --- */
+:root{ --bg:#0b1014; --bg-2:#171a21; --panel:#121a21; --text:#e6f4ff; --muted:#a7bdcc; --accent:#66c0f4; --accent-2:#1b2838; }
+body.app-dark{ color: var(--text); }
+
+/* Improve panel background / text contrast */
+.panel-dark{ background: linear-gradient(180deg,#141c23,#10171d); color: var(--text); }
+.panel-dark h1, .panel-dark h2, .panel-dark h3, .panel-dark h4, .panel-dark h5, .panel-dark h6{ color:#f0fbff; }
+
+/* Genre filter readability */
+.genre-filter .list-group-item{ color:#c4d8e6; }
+.genre-filter .list-group-item:hover{ color:#ffffff; }
+.genre-filter .list-group-item.active{ color:#ffffff; font-weight:600; background:rgba(102,192,244,.30); }
+
+/* Sidebar headings and links */
+.sidebar .sidebar-heading{ color:#8aa2b4; }
+.sidebar .nav-link{ color:#b9ccd9; }
+.sidebar .nav-link:hover{ color:#ffffff; }
+
+/* Muted text adjust */
+.text-muted, .meta-muted, .detail-list li span{ color: var(--muted) !important; }
+
+/* Badges contrast */
+.badge-soft{ background:rgba(102,192,244,.25); color:#f0fbff; border-color:rgba(102,192,244,.4); }
+.badge.bg-warning.text-dark{ color:#2d2d2d !important; }
+.badge.bg-success, .badge.bg-danger, .badge.bg-secondary{ filter:brightness(1.05); }
+
+/* Links */
+ a, .link-accent{ color: var(--accent); }
+ a:hover, .link-accent:hover{ color:#a8dbff; }
+
+/* Buttons text contrast tweaks */
+.btn-secondary{ color:#f0fbff; }
+.btn-secondary:hover{ color:#ffffff; }
+.btn-warning{ color:#1b1e22; }
+.btn-danger{ color:#ffffff; }
+
+/* Forms */
+.form-control-dark{ color:#e3f3ff; background:#10161c; }
+.form-control-dark::placeholder{ color:#5d7686; }
+.form-control-dark:focus{ color:#ffffff; }
+
+/* Search dropdown text */
+.search-result-meta{ color:#9fb4c2; }
+.search-result-title{ color:#f0fbff; }
+.search-result-price{ color:#b4f3d2; }
+
+/* Game cards */
+.game-title{ color:#f1faff; }
+.game-price{ color:#b4f3d2; }
+.pricing-single, .pricing-final{ color:#b4f3d2; }
+.pricing-original{ color:#89a2b3; }
+
+/* Hero banner overlay text */
+.hero-banner .overlay h1, .hero-banner .overlay p{ color:#f5fbff; }
+
+/* Reviews */
+.review-user{ color:#f0fbff; }
+.review-text{ color:#d1e6f3; }
+.review-date{ color:#9fb4c2; }
+
+/* Discount badge text clarity */
+.discount-badge{ text-shadow:0 1px 2px rgba(0,0,0,.6); }
+
+/* Footer */
+.site-footer{ color:#92aabb; }
+.site-footer a{ color:#66c0f4; }
+.site-footer a:hover{ color:#a8dbff; }
+
+/* Utility high contrast helpers */
+.text-high-contrast{ color:#ffffff !important; }
+.bg-elevated{ background:#162229 !important; }
+
+/* Ensure any glassy panels keep readable text */
+.glassy{ color:#e6f4ff; }
+.glassy .text-muted{ color:#a7bdcc !important; }
+
+/* Adjust toast color */
+.toast-body{ color:#f0fbff; }
+
+/* Table */
+.table-dark{ color:#e6f4ff; }
+.table-dark thead th{ color:#f0fbff; }
+.table-dark td{ color:#d7e7f2; }
+
+/* Screen reader focus outlines improved */
+:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+/* End contrast adjustments */
+/* Typography and base */
+:root{ --bg:#0b1014; --bg-2:#171a21; --panel:#0f1417; --text:#c6d4df; --muted:#8ca5b6; --accent:#66c0f4; --accent-2:#1b2838; }
+body.app-dark{ font-family: 'Inter','Segoe UI',Roboto,'Helvetica Neue',Arial; font-size: 16.5px; letter-spacing:.2px; background-color: var(--bg); color: var(--text); }
+
+.top-navbar{ background-color: var(--bg-2); border-bottom: 1px solid rgba(255,255,255,.06); }
+.main-links .nav-link{ color:#b8c9d8; }
+.hover-accent:hover{ color: var(--accent) !important; }
+
+/* Glassmorphism */
+.glassy{ backdrop-filter: blur(8px); background-color: rgba(23,26,33,.85); border: 1px solid rgba(255,255,255,.06); }
+
+/* Search animation */
+.search-anim{ transition: width .25s ease, background-color .25s ease; width: 210px; }
+.search-anim:focus{ width: 360px; background-color:#0f1318; }
+
+/* Sidebar */
+.sidebar{ background: linear-gradient(180deg,#0e1317,#0b0f12); min-height: calc(100vh - 64px); border-right: 1px solid rgba(255,255,255,.06); }
+.sidebar .nav-link{ color:#9fb6c8; padding:.35rem .75rem; border-radius:.35rem; transition: background .2s ease, color .2s ease; }
+.sidebar .nav-link:hover{ background: rgba(102,192,244,.08); color:#dff2ff; }
+.sidebar .sidebar-heading{ font-size:.72rem; color:#6b8596; letter-spacing:.12rem; }
+
+/* Genre Filter Dark Theme */
+.genre-filter{ background: transparent; }
+.genre-filter .list-group-item{ 
+    background: rgba(15,20,23,0.6); 
+    border: 1px solid rgba(255,255,255,.04); 
+    color: #9fb6c8; 
+    padding: .5rem .75rem;
+    margin-bottom: .25rem;
+    border-radius: .35rem;
+    transition: all .2s ease;
+}
+.genre-filter .list-group-item:hover{ 
+    background: rgba(102,192,244,.12); 
+    color: #dff2ff;
+    border-color: rgba(102,192,244,.3);
+    transform: translateX(4px);
+}
+.genre-filter .list-group-item:first-child{
+    background: rgba(102,192,244,.08);
+    border-color: rgba(102,192,244,.2);
+    color: #66c0f4;
+    font-weight: 600;
+}
+
+/* Cards and grid */
+.games-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 18px; }
+.game-card{ background: var(--panel); border: 1px solid rgba(255,255,255,.06); border-radius:10px; overflow:hidden; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.game-card:hover{ transform: translateY(-6px); box-shadow: 0 18px 42px rgba(3,10,22,.6); border-color: rgba(102,192,244,.35); }
+.game-card .cover{ width:100%; height: 300px; object-fit: cover; display:block; }
+.game-card-body{ padding: 12px 14px; }
+.game-title{ font-weight: 700; color:#e8f6ff; font-size: 1.05rem; }
+.badges{ display:flex; gap:6px; margin-top: 6px; flex-wrap: wrap; }
+.badge-soft{ background: rgba(102,192,244,.15); color:#cfeeff; border:1px solid rgba(102,192,244,.25); font-weight:600; }
+.game-price{ color:#9fd7b4; font-weight:700; }
+
+/* Ensure game card is a positioned container so absolute children (like rank badge) are placed correctly */
+.game-card { position: relative; overflow: hidden; }
+
+/* Rank badge adjustments */
+.rank-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 8px 12px;
+    border-radius: 50%;
+    z-index: 5; /* keep badge above card content but below header */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+@media (max-width: 576px) {
+    .rank-badge { font-size: 1rem; padding: 6px 10px; top: 8px; left: 8px; }
+}
+
+/* Actions */
+.actions{ display:flex; justify-content:space-between; align-items:center; margin-top: 12px; }
+.actions .d-flex{ gap:4px; }
+.actions .btn-sm{ padding: 4px 8px; font-size: .85rem; }
+
+/* Admin action buttons */
+.btn-warning{ background: #f0ad4e; border-color: #eea236; color: #000; }
+.btn-warning:hover{ background: #ec971f; border-color: #d58512; }
+.btn-danger{ background: #d9534f; border-color: #d43f3a; color: #fff; }
+.btn-danger:hover{ background: #c9302c; border-color: #ac2925; }
+
+/* Panels */
+.panel-dark{ background: var(--panel); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding: 14px; }
+
+/* Hero */
+.hero-banner{ background-size:cover; background-position:center; border-radius:10px; margin-bottom: 16px; box-shadow: 0 8px 32px rgba(5,12,26,.6); }
+.hero-banner .overlay{ background: linear-gradient(180deg, rgba(7,10,12,0) 0%, rgba(7,10,12,0.9) 70%); padding:24px; }
+
+/* Detail page */
+.game-detail{ display:grid; grid-template-columns: 1fr 360px; gap: 22px; }
+.game-banner{ height: 420px; border-radius:10px; background-size:cover; background-position:center; }
+.screenshots{ display:flex; gap:10px; overflow-x:auto; padding-bottom:8px; }
+.screenshot{ min-width: 240px; height: 130px; border-radius:8px; object-fit:cover; }
+
+/* Accent button */
+.btn-accent{ background: linear-gradient(180deg,#66c0f4,#2a8db7); border-color: rgba(0,0,0,.2); color:#06121a; }
+.btn-accent:hover{ filter: brightness(1.05); }
+
+/* Footer */
+.site-footer{ padding: 18px 0; border-top: 1px solid rgba(255,255,255,.06); color:#8ca5b6; }
+
+/* Toast */
+.toast-container .toast{ box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+
+/* Form Controls Dark */
+.form-control-dark{ background: #101318; border: 1px solid rgba(255,255,255,.1); color: #d1e8ff; }
+.form-control-dark:focus{ background: #0f1318; border-color: #66c0f4; color: #d1e8ff; box-shadow: 0 0 0 0.2rem rgba(102,192,244,.25); }
+
+/* Table Dark */
+.table-dark{ --bs-table-bg: rgba(15,20,23,0.6); --bs-table-striped-bg: rgba(255,255,255,0.02); --bs-table-hover-bg: rgba(102,192,244,0.08); color: #c6d4df; }
+
+/* Metadata / labels */
+.meta-info {
+    color: #dfeeff; /* brighter than muted */
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+.meta-muted {
+    color: var(--muted);
+    opacity: 0.95;
+}
+
+/* Small metadata variant */
+.meta-info.small, .meta-muted.small { font-size: .9rem; }
+
+/* Responsive */
+@media (max-width: 991px){
+    .sidebar { display:none; }
+    .game-detail { grid-template-columns: 1fr; }
+    .game-banner { height: 320px; }
+    .search-anim{ width: 180px; }
+    .search-anim:focus{ width: 250px; }
+}
+
+/* Search Dropdown - Steam Style */
+.search-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #1a1f2e 0%, #16181f 100%);
+    border: 1px solid rgba(102,192,244,0.3);
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(102,192,244,0.1);
+    margin-top: 8px;
+    max-height: 500px;
+    overflow-y: auto;
+    z-index: 9999;
+    display: none;
+    backdrop-filter: blur(10px);
+}
+.search-dropdown.active { display: block; animation: dropdownFadeIn 0.2s ease; }
+@keyframes dropdownFadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+.search-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 9998; display: none; backdrop-filter: blur(3px); }
+.search-overlay.active { display: block; animation: overlayFadeIn 0.3s ease; }
+@keyframes overlayFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.search-result-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: all 0.2s ease; cursor: pointer; text-decoration: none; color: inherit; }
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:hover { background: linear-gradient(90deg, rgba(102,192,244,0.15) 0%, rgba(102,192,244,0.05) 100%); transform: translateX(4px); }
+.search-result-thumbnail { width: 80px; height: 45px; border-radius: 4px; object-fit: cover; margin-right: 14px; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
+.search-result-info { flex: 1; min-width: 0; }
+.search-result-title { font-weight: 600; font-size: 0.95rem; color: #e8f6ff; margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.search-result-meta { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #8ca5b6; }
+.search-result-genre { padding: 2px 8px; background: rgba(102,192,244,0.15); border-radius: 3px; font-size: 0.75rem; color: #66c0f4; }
+.search-result-price { color: #9fd7b4; font-weight: 600; margin-left: auto; flex-shrink: 0; }
+.search-result-actions { display: flex; gap: 6px; margin-left: 12px; flex-shrink: 0; }
+.search-result-btn { padding: 6px 12px; background: rgba(102,192,244,0.2); border: 1px solid rgba(102,192,244,0.3); border-radius: 4px; color: #66c0f4; font-size: 0.8rem; text-decoration: none; transition: all 0.2s ease; white-space: nowrap; }
+.search-result-btn:hover { background: rgba(102,192,244,0.3); color: #fff; transform: translateY(-1px); }
+.search-no-results { padding: 40px 20px; text-align: center; color: #8ca5b6; }
+.search-no-results i { font-size: 3rem; color: #4a5568; margin-bottom: 10px; display: block; }
+.search-footer { padding: 12px 16px; background: rgba(0,0,0,0.3); border-top: 1px solid rgba(255,255,255,0.05); text-align: center; }
+.search-footer-link { color: #66c0f4; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease; }
+.search-footer-link:hover { color: #dff2ff; transform: translateX(4px); }
+.search-loading { padding: 30px; text-align: center; color: #66c0f4; }
+.search-spinner { display: inline-block; width: 30px; height: 30px; border: 3px solid rgba(102,192,244,0.2); border-top-color: #66c0f4; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.search-form .search-anim:focus { border-color: rgba(102,192,244,0.5); box-shadow: 0 0 0 3px rgba(102,192,244,0.15); }
+@media (max-width: 768px) { .search-dropdown { position: fixed; left: 10px; right: 10px; max-height: 70vh; } .search-result-item { flex-wrap: wrap; } .search-result-actions { margin-left: 94px; width: 100%; margin-top: 8px; } }
+
+/* Discount badge on game cards */
+.discount-badge { position: absolute; top: 10px; right: 10px; background: linear-gradient(135deg, #e74c3c, #c0392b); color: #fff; font-weight: 700; font-size: 0.9rem; padding: 6px 10px; border-radius: 4px; z-index: 10; box-shadow: 0 4px 8px rgba(0,0,0,0.3); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+.game-price { font-size: 1rem; font-weight: 600; }
+.original-price { text-decoration: line-through; color: #8ca5b6; margin-right: 8px; font-size: 0.9rem; }
+.discounted-price { color: #9fd7b4; font-size: 1.1rem; font-weight: 700; }
+

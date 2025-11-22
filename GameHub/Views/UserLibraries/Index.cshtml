@@ -1,0 +1,290 @@
+@model IEnumerable<GameHub.Models.UserLibrary>
+@{
+    ViewBag.Title = "Library";
+    var isAuth = (Session["IsAuthenticated"] as bool?) ?? false;
+    var currentUserId = (Session["UserID"] as int?) ?? 0;
+}
+
+<div class="hero-banner" style="background-image:url('/Content/hero-placeholder.jpg')">
+    <div class="overlay">
+        <h1 class="display-6">@(isAuth ? "Your Library" : "Access Restricted")</h1>
+        <p class="lead">@(isAuth ? "Manage your wishlist and owned games" : "Please sign in to view your game library")</p>
+        @if (!isAuth)
+        {
+            <a href="@Url.Action("Login","Account")" class="btn btn-accent btn-lg">Sign In</a>
+            <a href="@Url.Action("Register","Account")" class="btn btn-secondary btn-lg ms-2">Register</a>
+        }
+    </div>
+</div>
+
+@if (isAuth)
+{
+    if (Model == null || !Model.Any())
+    {
+        <div class="panel-dark text-center py-5">
+            <i class="bi bi-inbox display-1 text-muted"></i>
+            <h3 class="mt-3">Your Library is Empty</h3>
+            <p class="text-muted">Start building your collection by adding games from the store!</p>
+            <a href="@Url.Action("Index","Games")" class="btn btn-accent mt-3">Browse Store</a>
+        </div>
+    }
+    else
+    {
+        var owned = Model.Where(m => m.PurchaseDate != null).ToList();
+        var wishlist = Model.Where(m => m.PurchaseDate == null).ToList();
+
+        if (wishlist.Any())
+        {
+            <div class="mb-4">
+                <h4 class="mb-3"><i class="bi bi-bookmark"></i> Wishlist (@wishlist.Count)</h4>
+                <div class="games-grid">
+                @foreach (var item in wishlist)
+                {
+                    <div class="game-card" data-library-id="@item.LibraryID">
+                        <img class="cover" src="/Content/covers/@(item.GameID).jpg" alt="@item.Game.Title" onerror="this.src='/Content/cover-placeholder.jpg'" />
+                        <div class="game-card-body">
+                            <div class="game-title">@item.Game.Title</div>
+                            <div class="badges">
+                                <span class="badge badge-soft">@(item.Game.Genre1?.GenreName ?? "General")</span>
+                                <span class="badge bg-warning text-dark">Wishlist</span>
+                            </div>
+                            <div class="game-price mt-2 mb-2">$@item.Game.Price</div>
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-accent btn-sm w-100 mb-1 buy-now-btn" data-game-id="@item.GameID" data-user-id="@item.UserID" data-price="@item.Game.Price" data-title="@item.Game.Title">
+                                    <i class="bi bi-credit-card"></i> Buy Now
+                                </button>
+                                @using (Html.BeginForm("RemoveFromWishlist", "UserLibraries", FormMethod.Post, new { @class = "remove-form d-inline" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    @Html.Hidden("libraryId", item.LibraryID)
+                                    <button type="submit" class="btn btn-danger btn-sm w-100 mb-1">
+                                        <i class="bi bi-x-circle"></i> Remove
+                                    </button>
+                                }
+                                <a href="@Url.Action("Details","Games", new { id = item.GameID })" class="btn btn-secondary btn-sm w-100">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+                </div>
+            </div>
+        }
+
+        if (owned.Any())
+        {
+            <div class="mb-4">
+                <h4 class="mb-3"><i class="bi bi-collection"></i> Owned Games (@owned.Count)</h4>
+                <div class="games-grid">
+                @foreach (var item in owned)
+                {
+                    <div class="game-card">
+                        <img class="cover" src="/Content/covers/@(item.GameID).jpg" alt="@item.Game.Title" onerror="this.src='/Content/cover-placeholder.jpg'" />
+                        <div class="game-card-body">
+                            <div class="game-title">@item.Game.Title</div>
+                            <div class="badges">
+                                <span class="badge badge-soft">@(item.Game.Genre1?.GenreName ?? "General")</span>
+                                <span class="badge bg-success">Owned</span>
+                                @if (item.Game.Rating.HasValue) { <span class="badge badge-soft"><i class="bi bi-star-fill"></i> @item.Game.Rating.Value.ToString("0.0")</span> }
+                            </div>
+                            <div class="text-muted small mt-2">
+                                <div><i class="bi bi-calendar"></i> Purchased: @(item.PurchaseDate.HasValue ? item.PurchaseDate.Value.ToString("MMM dd, yyyy") : "N/A")</div>
+                                <div><i class="bi bi-key"></i> @item.ActivationCode</div>
+                            </div>
+                            <div class="mt-2">
+                                <a href="@Url.Action("Details","Games", new { id = item.GameID })" class="btn btn-secondary btn-sm w-100">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+                </div>
+            </div>
+        }
+    }
+}
+
+<!-- Discount Code Modal -->
+<div class="modal fade" id="discountModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glassy">
+            <div class="modal-header border-0">
+                <h5 class="modal-title"><i class="bi bi-tag"></i> Complete Purchase</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="purchaseGameInfo" class="mb-3">
+                    <h6 id="purchaseGameTitle" class="fw-bold"></h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Original Price:</span>
+                        <span id="purchaseOriginalPrice" class="fw-bold"></span>
+                    </div>
+                    <div id="discountInfo" class="d-flex justify-content-between align-items-center text-success" style="display:none!important;">
+                        <span>Discount:</span>
+                        <span id="discountAmount"></span>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">Final Price:</span>
+                        <span id="purchaseFinalPrice" class="fw-bold text-success fs-5"></span>
+                    </div>
+                </div>
+                @using (Html.BeginForm("Purchase", "Transactions", FormMethod.Post, new { id = "purchaseForm" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.Hidden("userId", null, new { id = "modalUserId" })
+                    @Html.Hidden("gameId", null, new { id = "modalGameId" })
+                    @Html.Hidden("paymentMethod", "Card")
+                    <div class="mb-3">
+                        <label class="form-label">Discount Code (Optional)</label>
+                        <input type="text" class="form-control form-control-dark" id="discountCode" name="discountCode" placeholder="Enter code" />
+                        <button type="button" class="btn btn-sm btn-secondary mt-2" id="applyDiscountBtn"><i class="bi bi-check-circle"></i> Apply</button>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-accent btn-lg"><i class="bi bi-credit-card"></i> Confirm Purchase</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+$(document).ready(function() {
+    var currentGamePrice = 0;
+    var currentDiscountPercent = 0;
+
+    // Buy Now button handler - open modal
+    $('.buy-now-btn').on('click', function() {
+        var gameId = $(this).data('game-id');
+        var userId = $(this).data('user-id');
+        var price = parseFloat($(this).data('price'));
+        var title = $(this).data('title');
+        
+        currentGamePrice = price;
+        currentDiscountPercent = 0;
+        
+        $('#modalGameId').val(gameId);
+        $('#modalUserId').val(userId);
+        $('#purchaseGameTitle').text(title);
+        $('#purchaseOriginalPrice').text('$' + price.toFixed(2));
+        $('#purchaseFinalPrice').text('$' + price.toFixed(2));
+        $('#discountInfo').hide();
+        $('#discountCode').val("");
+        
+        var modal = new bootstrap.Modal(document.getElementById('discountModal'));
+        modal.show();
+    });
+
+    // Apply discount code
+    $('#applyDiscountBtn').on('click', function() {
+        var code = $('#discountCode').val().trim();
+        var gameId = $('#modalGameId').val();
+        
+        if (!code) {
+            showToast('Please enter a discount code', 'error');
+            return;
+        }
+        
+        $(this).prop('disabled', true).html('<i class="bi bi-hourglass-split"></i> Checking...');
+        
+        $.ajax({
+            url: '@Url.Action("ValidateDiscount", "Transactions")',
+            type: 'GET',
+            data: { code: code, gameId: gameId },
+            success: function(response) {
+                if (response.valid) {
+                    currentDiscountPercent = response.percent;
+                    var discountAmount = currentGamePrice * (response.percent / 100);
+                    var finalPrice = currentGamePrice - discountAmount;
+                    
+                    $('#discountAmount').text('-$' + discountAmount.toFixed(2) + ' (' + response.percent + '%)');
+                    $('#discountInfo').show();
+                    $('#purchaseFinalPrice').text('$' + finalPrice.toFixed(2));
+                    showToast('Discount applied!', 'success');
+                } else {
+                    showToast(response.message || 'Invalid discount code', 'error');
+                    currentDiscountPercent = 0;
+                    $('#discountInfo').hide();
+                    $('#purchaseFinalPrice').text('$' + currentGamePrice.toFixed(2));
+                }
+                $('#applyDiscountBtn').prop('disabled', false).html('<i class="bi bi-check-circle"></i> Apply');
+            },
+            error: function() {
+                showToast('Failed to validate code', 'error');
+                $('#applyDiscountBtn').prop('disabled', false).html('<i class="bi bi-check-circle"></i> Apply');
+            }
+        });
+    });
+
+    // Purchase form handler
+    $('#purchaseForm').on('submit', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        
+        form.find('button[type="submit"]').prop('disabled', true).html('<i class="bi bi-hourglass-split"></i> Processing...');
+        
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            dataType: 'json',
+            success: function(response) {
+                if (response.success || response) {
+                    bootstrap.Modal.getInstance(document.getElementById('discountModal')).hide();
+                    showToast('Purchase successful! Check your owned games.', 'success');
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showToast(response.message || 'Purchase failed.', 'error');
+                    form.find('button[type="submit"]').prop('disabled', false).html('<i class="bi bi-credit-card"></i> Confirm Purchase');
+                }
+            },
+            error: function() {
+                showToast('Purchase failed. Please try again.', 'error');
+                form.find('button[type="submit"]').prop('disabled', false).html('<i class="bi bi-credit-card"></i> Confirm Purchase');
+            }
+        });
+    });
+
+    // Remove from wishlist handler
+    $('.remove-form').on('submit', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        var card = form.closest('.game-card');
+        
+        if (!confirm('Remove this game from your wishlist?')) return;
+        
+        form.find('button').prop('disabled', true).html('<i class="bi bi-hourglass-split"></i> Removing...');
+        
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    showToast(response.message || 'Removed from wishlist', 'success');
+                    card.fadeOut(400, function() {
+                        $(this).remove();
+                        // Check if wishlist is empty and reload if needed
+                        if ($('.game-card[data-library-id]').length === 0) {
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 500);
+                        }
+                    });
+                } else {
+                    showToast(response.message || 'Failed to remove.', 'error');
+                    form.find('button').prop('disabled', false).html('<i class="bi bi-x-circle"></i> Remove');
+                }
+            },
+            error: function() {
+                showToast('Failed to remove. Please try again.', 'error');
+                form.find('button').prop('disabled', false).html('<i class="bi bi-x-circle"></i> Remove');
+            }
+        });
+    });
+});
+</script>
+}

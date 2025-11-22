@@ -1,0 +1,92 @@
+﻿@model GameHub.Models.User
+@{
+    ViewBag.Title = "User Details";
+    var isActive = Model.IsActive == true;
+    var userType = Model.UserType ?? "User";
+}
+
+<div class="hero-banner" style="background-image:url('/Content/hero-placeholder.jpg')">
+  <div class="overlay">
+    <h1 class="display-6"><i class="bi bi-person-badge"></i> User Profile</h1>
+    <p class="lead">Account information & status</p>
+  </div>
+</div>
+
+<div class="container-xl mt-4">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="panel-dark glassy p-4 mb-3">
+                <div class="d-flex align-items-start gap-3 flex-wrap">
+                    <div class="user-avatar-circle">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h2 class="mb-1 fw-semibold">@Model.FullName</h2>
+                        <div class="mb-2">
+                            <span class="badge @(userType.Equals("Admin", System.StringComparison.OrdinalIgnoreCase) ? "bg-danger" : "bg-primary")">@userType</span>
+                            <span class="badge @(isActive ? "bg-success" : "bg-secondary") ms-1">@(isActive ? "Active" : "Inactive")</span>
+                        </div>
+                        <div class="small text-muted">Joined: @(Model.JoinDate?.ToString("MMM dd, yyyy HH:mm") ?? "N/A")</div>
+                    </div>
+                </div>
+                <hr class="my-4" />
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="label">Full Name</span>
+                        <span class="value">@Model.FullName</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Email</span>
+                        <span class="value text-info">@Model.Email</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Password</span>
+                        <span class="value"><code>@Model.PasswordHash</code></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">User Type</span>
+                        <span class="value">@userType</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Active</span>
+                        <span class="value">@(isActive ? "Yes" : "No")</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Join Date</span>
+                        <span class="value">@(Model.JoinDate?.ToString("dd MMM yyyy, HH:mm") ?? "N/A")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="panel-dark glassy p-4 mb-3">
+                <h5 class="fw-semibold mb-3"><i class="bi bi-gear"></i> Actions</h5>
+                <div class="d-grid gap-2">
+                    @Html.ActionLink("Edit User", "Edit", new { id = Model.UserID }, new { @class = "btn btn-accent" })
+                    @Html.ActionLink("Reset Password", "ResetPassword", "UserManagement", new { id = Model.UserID }, new { @class = "btn btn-warning" })
+                    @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-secondary" })
+                </div>
+            </div>
+            <div class="panel-dark glassy p-4">
+                <h5 class="fw-semibold mb-3"><i class="bi bi-shield-lock"></i> Security Note</h5>
+                <p class="text-muted small mb-0">Passwords are stored in plain text for demonstration purposes. Replace with hashed storage (e.g. BCrypt) before production deployment.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+<style>
+.user-avatar-circle { width:90px; height:90px; border-radius:50%; background:linear-gradient(135deg,#13202c,#0d141b); display:flex; align-items:center; justify-content:center; font-size:3rem; color:#66c0f4; border:1px solid rgba(255,255,255,.08); box-shadow:0 8px 24px rgba(0,0,0,.4); }
+.details-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
+.detail-item { background:rgba(15,22,30,.65); border:1px solid rgba(255,255,255,.06); padding:12px 14px; border-radius:10px; font-size:.8rem; position:relative; }
+.detail-item .label { display:block; font-size:.65rem; text-transform:uppercase; letter-spacing:.5px; color:#8fa5b8; margin-bottom:4px; }
+.detail-item .value { font-weight:600; color:#e6f4ff; word-break:break-word; }
+.panel-dark.glassy { background:rgba(20,26,32,.85); border:1px solid rgba(255,255,255,.06); border-radius:12px; }
+.hero-banner { position:relative; background-size:cover; background-position:center; min-height:200px; display:flex; align-items:center; }
+.hero-banner .overlay { background:rgba(10,15,25,.85); position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; padding:40px 30px; }
+.hero-banner h1 { margin:0 0 8px; }
+.hero-banner p { margin:0; }
+@@media (max-width: 576px){ .details-grid { grid-template-columns:1fr; } .user-avatar-circle { width:70px; height:70px; font-size:2.2rem; } }
+</style>
+}

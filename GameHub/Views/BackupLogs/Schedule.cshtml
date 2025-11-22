@@ -1,0 +1,17 @@
+@{
+    ViewBag.Title = "Backup Scheduling";
+}
+<div class="page-header">
+    <h2>Backup Scheduling</h2>
+</div>
+<p class="text-muted">
+    To schedule automatic backups, configure a Windows Task Scheduler job that invokes your database backup script or calls this application's backup endpoint.
+</p>
+<ol>
+    <li>Create a PowerShell script to call the BACKUP DATABASE command or an admin API endpoint.</li>
+    <li>Open Task Scheduler, create a new task, set triggers (daily/weekly), and actions to run the script.</li>
+    <li>Ensure the task has proper permissions and the destination folder exists.</li>
+</ol>
+<p>
+    For SQL Server Express, see "sqlcmd" usage, or for LocalDB, consider detaching/copying the MDF/LDF offline.
+</p>

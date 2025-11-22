@@ -1,0 +1,622 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="GameManagementMISModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="BackupLogs">
+          <Key>
+            <PropertyRef Name="BackupID" />
+          </Key>
+          <Property Name="BackupID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="BackupDate" Type="datetime" />
+          <Property Name="FilePath" Type="nvarchar" MaxLength="255" />
+          <Property Name="PerformedBy" Type="nvarchar" MaxLength="100" />
+        </EntityType>
+        <EntityType Name="Discounts">
+          <Key>
+            <PropertyRef Name="DiscountID" />
+          </Key>
+          <Property Name="DiscountID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="DiscountName" Type="nvarchar" MaxLength="100" />
+          <Property Name="DiscountPercent" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="StartDate" Type="date" />
+          <Property Name="EndDate" Type="date" />
+        </EntityType>
+        <EntityType Name="GameDiscounts">
+          <Key>
+            <PropertyRef Name="GameID" />
+            <PropertyRef Name="DiscountID" />
+          </Key>
+          <Property Name="GameID" Type="int" Nullable="false" />
+          <Property Name="DiscountID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="GameFeedback">
+          <Key>
+            <PropertyRef Name="FeedbackID" />
+          </Key>
+          <Property Name="FeedbackID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserID" Type="int" Nullable="false" />
+          <Property Name="GameID" Type="int" Nullable="false" />
+          <Property Name="Rating" Type="int" />
+          <Property Name="Review" Type="nvarchar(max)" />
+          <Property Name="FeedbackDate" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Games">
+          <Key>
+            <PropertyRef Name="GameID" />
+          </Key>
+          <Property Name="GameID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Title" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Genre" Type="nvarchar" MaxLength="50" />
+          <Property Name="Description" Type="nvarchar(max)" />
+          <Property Name="Rating" Type="decimal" Precision="3" Scale="2" />
+          <Property Name="Price" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="ReleaseDate" Type="date" />
+          <Property Name="IsAvailable" Type="bit" />
+          <Property Name="GenreID" Type="int" />
+        </EntityType>
+        <EntityType Name="Genres">
+          <Key>
+            <PropertyRef Name="GenreID" />
+          </Key>
+          <Property Name="GenreID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="GenreName" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Transactions">
+          <Key>
+            <PropertyRef Name="TransactionID" />
+          </Key>
+          <Property Name="TransactionID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserID" Type="int" Nullable="false" />
+          <Property Name="GameID" Type="int" Nullable="false" />
+          <Property Name="PurchaseDate" Type="datetime" />
+          <Property Name="PriceAtPurchase" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="DiscountApplied" Type="decimal" Precision="10" Scale="2" />
+          <Property Name="PaymentMethod" Type="nvarchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="UserLibrary">
+          <Key>
+            <PropertyRef Name="LibraryID" />
+          </Key>
+          <Property Name="LibraryID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserID" Type="int" Nullable="false" />
+          <Property Name="GameID" Type="int" Nullable="false" />
+          <Property Name="PurchaseDate" Type="datetime" />
+          <Property Name="ActivationCode" Type="nvarchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="Users">
+          <Key>
+            <PropertyRef Name="UserID" />
+          </Key>
+          <Property Name="UserID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="FullName" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Email" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="PasswordHash" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="JoinDate" Type="datetime" />
+          <Property Name="UserType" Type="nvarchar" MaxLength="20" />
+          <Property Name="IsActive" Type="bit" />
+        </EntityType>
+        <Association Name="FK__GameDisco__Disco__31EC6D26">
+          <End Role="Discounts" Type="Self.Discounts" Multiplicity="1" />
+          <End Role="GameDiscounts" Type="Self.GameDiscounts" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Discounts">
+              <PropertyRef Name="DiscountID" />
+            </Principal>
+            <Dependent Role="GameDiscounts">
+              <PropertyRef Name="DiscountID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__GameDisco__GameI__30F848ED">
+          <End Role="Games" Type="Self.Games" Multiplicity="1" />
+          <End Role="GameDiscounts" Type="Self.GameDiscounts" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Games">
+              <PropertyRef Name="GameID" />
+            </Principal>
+            <Dependent Role="GameDiscounts">
+              <PropertyRef Name="GameID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__GameFeedb__GameI__286302EC">
+          <End Role="Games" Type="Self.Games" Multiplicity="1" />
+          <End Role="GameFeedback" Type="Self.GameFeedback" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Games">
+              <PropertyRef Name="GameID" />
+            </Principal>
+            <Dependent Role="GameFeedback">
+              <PropertyRef Name="GameID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__GameFeedb__UserI__276EDEB3">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="GameFeedback" Type="Self.GameFeedback" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="GameFeedback">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Games__GenreID__2C3393D0">
+          <End Role="Genres" Type="Self.Genres" Multiplicity="0..1" />
+          <End Role="Games" Type="Self.Games" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Genres">
+              <PropertyRef Name="GenreID" />
+            </Principal>
+            <Dependent Role="Games">
+              <PropertyRef Name="GenreID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Transacti__GameI__1CF15040">
+          <End Role="Games" Type="Self.Games" Multiplicity="1" />
+          <End Role="Transactions" Type="Self.Transactions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Games">
+              <PropertyRef Name="GameID" />
+            </Principal>
+            <Dependent Role="Transactions">
+              <PropertyRef Name="GameID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Transacti__UserI__1BFD2C07">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Transactions" Type="Self.Transactions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="Transactions">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UserLibra__GameI__22AA2996">
+          <End Role="Games" Type="Self.Games" Multiplicity="1" />
+          <End Role="UserLibrary" Type="Self.UserLibrary" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Games">
+              <PropertyRef Name="GameID" />
+            </Principal>
+            <Dependent Role="UserLibrary">
+              <PropertyRef Name="GameID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UserLibra__UserI__21B6055D">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="UserLibrary" Type="Self.UserLibrary" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="UserLibrary">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="GameManagementMISModelStoreContainer">
+          <EntitySet Name="BackupLogs" EntityType="Self.BackupLogs" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Discounts" EntityType="Self.Discounts" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="GameDiscounts" EntityType="Self.GameDiscounts" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="GameFeedback" EntityType="Self.GameFeedback" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Games" EntityType="Self.Games" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Genres" EntityType="Self.Genres" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Transactions" EntityType="Self.Transactions" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UserLibrary" EntityType="Self.UserLibrary" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK__GameDisco__Disco__31EC6D26" Association="Self.FK__GameDisco__Disco__31EC6D26">
+            <End Role="Discounts" EntitySet="Discounts" />
+            <End Role="GameDiscounts" EntitySet="GameDiscounts" />
+          </AssociationSet>
+          <AssociationSet Name="FK__GameDisco__GameI__30F848ED" Association="Self.FK__GameDisco__GameI__30F848ED">
+            <End Role="Games" EntitySet="Games" />
+            <End Role="GameDiscounts" EntitySet="GameDiscounts" />
+          </AssociationSet>
+          <AssociationSet Name="FK__GameFeedb__GameI__286302EC" Association="Self.FK__GameFeedb__GameI__286302EC">
+            <End Role="Games" EntitySet="Games" />
+            <End Role="GameFeedback" EntitySet="GameFeedback" />
+          </AssociationSet>
+          <AssociationSet Name="FK__GameFeedb__UserI__276EDEB3" Association="Self.FK__GameFeedb__UserI__276EDEB3">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="GameFeedback" EntitySet="GameFeedback" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Games__GenreID__2C3393D0" Association="Self.FK__Games__GenreID__2C3393D0">
+            <End Role="Genres" EntitySet="Genres" />
+            <End Role="Games" EntitySet="Games" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Transacti__GameI__1CF15040" Association="Self.FK__Transacti__GameI__1CF15040">
+            <End Role="Games" EntitySet="Games" />
+            <End Role="Transactions" EntitySet="Transactions" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Transacti__UserI__1BFD2C07" Association="Self.FK__Transacti__UserI__1BFD2C07">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Transactions" EntitySet="Transactions" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UserLibra__GameI__22AA2996" Association="Self.FK__UserLibra__GameI__22AA2996">
+            <End Role="Games" EntitySet="Games" />
+            <End Role="UserLibrary" EntitySet="UserLibrary" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UserLibra__UserI__21B6055D" Association="Self.FK__UserLibra__UserI__21B6055D">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="UserLibrary" EntitySet="UserLibrary" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="GameManagementMISModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="BackupLog">
+          <Key>
+            <PropertyRef Name="BackupID" />
+          </Key>
+          <Property Name="BackupID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="BackupDate" Type="DateTime" Precision="3" />
+          <Property Name="FilePath" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="PerformedBy" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="Discount">
+          <Key>
+            <PropertyRef Name="DiscountID" />
+          </Key>
+          <Property Name="DiscountID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="DiscountName" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="DiscountPercent" Type="Decimal" Precision="5" Scale="2" />
+          <Property Name="StartDate" Type="DateTime" Precision="0" />
+          <Property Name="EndDate" Type="DateTime" Precision="0" />
+          <NavigationProperty Name="Games" Relationship="Self.GameDiscounts" FromRole="Discounts" ToRole="Games" />
+        </EntityType>
+        <EntityType Name="GameFeedback">
+          <Key>
+            <PropertyRef Name="FeedbackID" />
+          </Key>
+          <Property Name="FeedbackID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" Nullable="false" />
+          <Property Name="GameID" Type="Int32" Nullable="false" />
+          <Property Name="Rating" Type="Int32" />
+          <Property Name="Review" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="FeedbackDate" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Game" Relationship="Self.FK__GameFeedb__GameI__286302EC" FromRole="GameFeedback" ToRole="Games" />
+          <NavigationProperty Name="User" Relationship="Self.FK__GameFeedb__UserI__276EDEB3" FromRole="GameFeedback" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="Game">
+          <Key>
+            <PropertyRef Name="GameID" />
+          </Key>
+          <Property Name="GameID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Title" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Genre" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Rating" Type="Decimal" Precision="3" Scale="2" />
+          <Property Name="Price" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="ReleaseDate" Type="DateTime" Precision="0" />
+          <Property Name="IsAvailable" Type="Boolean" />
+          <Property Name="GenreID" Type="Int32" />
+          <NavigationProperty Name="GameFeedbacks" Relationship="Self.FK__GameFeedb__GameI__286302EC" FromRole="Games" ToRole="GameFeedback" />
+          <NavigationProperty Name="Genre1" Relationship="Self.FK__Games__GenreID__2C3393D0" FromRole="Games" ToRole="Genres" />
+          <NavigationProperty Name="Transactions" Relationship="Self.FK__Transacti__GameI__1CF15040" FromRole="Games" ToRole="Transactions" />
+          <NavigationProperty Name="UserLibraries" Relationship="Self.FK__UserLibra__GameI__22AA2996" FromRole="Games" ToRole="UserLibrary" />
+          <NavigationProperty Name="Discounts" Relationship="Self.GameDiscounts" FromRole="Games" ToRole="Discounts" />
+        </EntityType>
+        <EntityType Name="Genre">
+          <Key>
+            <PropertyRef Name="GenreID" />
+          </Key>
+          <Property Name="GenreID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="GenreName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="Games" Relationship="Self.FK__Games__GenreID__2C3393D0" FromRole="Genres" ToRole="Games" />
+        </EntityType>
+        <EntityType Name="Transaction">
+          <Key>
+            <PropertyRef Name="TransactionID" />
+          </Key>
+          <Property Name="TransactionID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" Nullable="false" />
+          <Property Name="GameID" Type="Int32" Nullable="false" />
+          <Property Name="PurchaseDate" Type="DateTime" Precision="3" />
+          <Property Name="PriceAtPurchase" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="DiscountApplied" Type="Decimal" Precision="10" Scale="2" />
+          <Property Name="PaymentMethod" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Game" Relationship="Self.FK__Transacti__GameI__1CF15040" FromRole="Transactions" ToRole="Games" />
+          <NavigationProperty Name="User" Relationship="Self.FK__Transacti__UserI__1BFD2C07" FromRole="Transactions" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="UserLibrary">
+          <Key>
+            <PropertyRef Name="LibraryID" />
+          </Key>
+          <Property Name="LibraryID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" Nullable="false" />
+          <Property Name="GameID" Type="Int32" Nullable="false" />
+          <Property Name="PurchaseDate" Type="DateTime" Precision="3" />
+          <Property Name="ActivationCode" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Game" Relationship="Self.FK__UserLibra__GameI__22AA2996" FromRole="UserLibrary" ToRole="Games" />
+          <NavigationProperty Name="User" Relationship="Self.FK__UserLibra__UserI__21B6055D" FromRole="UserLibrary" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="User">
+          <Key>
+            <PropertyRef Name="UserID" />
+          </Key>
+          <Property Name="UserID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="FullName" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Email" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="PasswordHash" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="JoinDate" Type="DateTime" Precision="3" />
+          <Property Name="UserType" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="IsActive" Type="Boolean" />
+          <NavigationProperty Name="GameFeedbacks" Relationship="Self.FK__GameFeedb__UserI__276EDEB3" FromRole="Users" ToRole="GameFeedback" />
+          <NavigationProperty Name="Transactions" Relationship="Self.FK__Transacti__UserI__1BFD2C07" FromRole="Users" ToRole="Transactions" />
+          <NavigationProperty Name="UserLibraries" Relationship="Self.FK__UserLibra__UserI__21B6055D" FromRole="Users" ToRole="UserLibrary" />
+        </EntityType>
+        <Association Name="FK__GameFeedb__GameI__286302EC">
+          <End Role="Games" Type="Self.Game" Multiplicity="1" />
+          <End Role="GameFeedback" Type="Self.GameFeedback" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Games">
+              <PropertyRef Name="GameID" />
+            </Principal>
+            <Dependent Role="GameFeedback">
+              <PropertyRef Name="GameID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__GameFeedb__UserI__276EDEB3">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="GameFeedback" Type="Self.GameFeedback" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="GameFeedback">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Games__GenreID__2C3393D0">
+          <End Role="Genres" Type="Self.Genre" Multiplicity="0..1" />
+          <End Role="Games" Type="Self.Game" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Genres">
+              <PropertyRef Name="GenreID" />
+            </Principal>
+            <Dependent Role="Games">
+              <PropertyRef Name="GenreID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Transacti__GameI__1CF15040">
+          <End Role="Games" Type="Self.Game" Multiplicity="1" />
+          <End Role="Transactions" Type="Self.Transaction" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Games">
+              <PropertyRef Name="GameID" />
+            </Principal>
+            <Dependent Role="Transactions">
+              <PropertyRef Name="GameID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UserLibra__GameI__22AA2996">
+          <End Role="Games" Type="Self.Game" Multiplicity="1" />
+          <End Role="UserLibrary" Type="Self.UserLibrary" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Games">
+              <PropertyRef Name="GameID" />
+            </Principal>
+            <Dependent Role="UserLibrary">
+              <PropertyRef Name="GameID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Transacti__UserI__1BFD2C07">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="Transactions" Type="Self.Transaction" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="Transactions">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UserLibra__UserI__21B6055D">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="UserLibrary" Type="Self.UserLibrary" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="UserLibrary">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="GameDiscounts">
+          <End Role="Discounts" Type="Self.Discount" Multiplicity="*" />
+          <End Role="Games" Type="Self.Game" Multiplicity="*" />
+        </Association>
+        <EntityContainer Name="GameManagementMISEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="BackupLogs" EntityType="Self.BackupLog" />
+          <EntitySet Name="Discounts" EntityType="Self.Discount" />
+          <EntitySet Name="GameFeedbacks" EntityType="Self.GameFeedback" />
+          <EntitySet Name="Games" EntityType="Self.Game" />
+          <EntitySet Name="Genres" EntityType="Self.Genre" />
+          <EntitySet Name="Transactions" EntityType="Self.Transaction" />
+          <EntitySet Name="UserLibraries" EntityType="Self.UserLibrary" />
+          <EntitySet Name="Users" EntityType="Self.User" />
+          <AssociationSet Name="FK__GameFeedb__GameI__286302EC" Association="Self.FK__GameFeedb__GameI__286302EC">
+            <End Role="Games" EntitySet="Games" />
+            <End Role="GameFeedback" EntitySet="GameFeedbacks" />
+          </AssociationSet>
+          <AssociationSet Name="FK__GameFeedb__UserI__276EDEB3" Association="Self.FK__GameFeedb__UserI__276EDEB3">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="GameFeedback" EntitySet="GameFeedbacks" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Games__GenreID__2C3393D0" Association="Self.FK__Games__GenreID__2C3393D0">
+            <End Role="Genres" EntitySet="Genres" />
+            <End Role="Games" EntitySet="Games" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Transacti__GameI__1CF15040" Association="Self.FK__Transacti__GameI__1CF15040">
+            <End Role="Games" EntitySet="Games" />
+            <End Role="Transactions" EntitySet="Transactions" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UserLibra__GameI__22AA2996" Association="Self.FK__UserLibra__GameI__22AA2996">
+            <End Role="Games" EntitySet="Games" />
+            <End Role="UserLibrary" EntitySet="UserLibraries" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Transacti__UserI__1BFD2C07" Association="Self.FK__Transacti__UserI__1BFD2C07">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Transactions" EntitySet="Transactions" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UserLibra__UserI__21B6055D" Association="Self.FK__UserLibra__UserI__21B6055D">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="UserLibrary" EntitySet="UserLibraries" />
+          </AssociationSet>
+          <AssociationSet Name="GameDiscounts" Association="Self.GameDiscounts">
+            <End Role="Discounts" EntitySet="Discounts" />
+            <End Role="Games" EntitySet="Games" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="GameManagementMISModelStoreContainer" CdmEntityContainer="GameManagementMISEntities">
+          <EntitySetMapping Name="BackupLogs">
+            <EntityTypeMapping TypeName="GameManagementMISModel.BackupLog">
+              <MappingFragment StoreEntitySet="BackupLogs">
+                <ScalarProperty Name="BackupID" ColumnName="BackupID" />
+                <ScalarProperty Name="BackupDate" ColumnName="BackupDate" />
+                <ScalarProperty Name="FilePath" ColumnName="FilePath" />
+                <ScalarProperty Name="PerformedBy" ColumnName="PerformedBy" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Discounts">
+            <EntityTypeMapping TypeName="GameManagementMISModel.Discount">
+              <MappingFragment StoreEntitySet="Discounts">
+                <ScalarProperty Name="DiscountID" ColumnName="DiscountID" />
+                <ScalarProperty Name="DiscountName" ColumnName="DiscountName" />
+                <ScalarProperty Name="DiscountPercent" ColumnName="DiscountPercent" />
+                <ScalarProperty Name="StartDate" ColumnName="StartDate" />
+                <ScalarProperty Name="EndDate" ColumnName="EndDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="GameFeedbacks">
+            <EntityTypeMapping TypeName="GameManagementMISModel.GameFeedback">
+              <MappingFragment StoreEntitySet="GameFeedback">
+                <ScalarProperty Name="FeedbackID" ColumnName="FeedbackID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="GameID" ColumnName="GameID" />
+                <ScalarProperty Name="Rating" ColumnName="Rating" />
+                <ScalarProperty Name="Review" ColumnName="Review" />
+                <ScalarProperty Name="FeedbackDate" ColumnName="FeedbackDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Games">
+            <EntityTypeMapping TypeName="GameManagementMISModel.Game">
+              <MappingFragment StoreEntitySet="Games">
+                <ScalarProperty Name="GameID" ColumnName="GameID" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="Genre" ColumnName="Genre" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Rating" ColumnName="Rating" />
+                <ScalarProperty Name="Price" ColumnName="Price" />
+                <ScalarProperty Name="ReleaseDate" ColumnName="ReleaseDate" />
+                <ScalarProperty Name="IsAvailable" ColumnName="IsAvailable" />
+                <ScalarProperty Name="GenreID" ColumnName="GenreID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Genres">
+            <EntityTypeMapping TypeName="GameManagementMISModel.Genre">
+              <MappingFragment StoreEntitySet="Genres">
+                <ScalarProperty Name="GenreID" ColumnName="GenreID" />
+                <ScalarProperty Name="GenreName" ColumnName="GenreName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Transactions">
+            <EntityTypeMapping TypeName="GameManagementMISModel.Transaction">
+              <MappingFragment StoreEntitySet="Transactions">
+                <ScalarProperty Name="TransactionID" ColumnName="TransactionID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="GameID" ColumnName="GameID" />
+                <ScalarProperty Name="PurchaseDate" ColumnName="PurchaseDate" />
+                <ScalarProperty Name="PriceAtPurchase" ColumnName="PriceAtPurchase" />
+                <ScalarProperty Name="DiscountApplied" ColumnName="DiscountApplied" />
+                <ScalarProperty Name="PaymentMethod" ColumnName="PaymentMethod" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UserLibraries">
+            <EntityTypeMapping TypeName="GameManagementMISModel.UserLibrary">
+              <MappingFragment StoreEntitySet="UserLibrary">
+                <ScalarProperty Name="LibraryID" ColumnName="LibraryID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="GameID" ColumnName="GameID" />
+                <ScalarProperty Name="PurchaseDate" ColumnName="PurchaseDate" />
+                <ScalarProperty Name="ActivationCode" ColumnName="ActivationCode" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Users">
+            <EntityTypeMapping TypeName="GameManagementMISModel.User">
+              <MappingFragment StoreEntitySet="Users">
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="FullName" ColumnName="FullName" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="PasswordHash" ColumnName="PasswordHash" />
+                <ScalarProperty Name="JoinDate" ColumnName="JoinDate" />
+                <ScalarProperty Name="UserType" ColumnName="UserType" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <AssociationSetMapping Name="GameDiscounts" TypeName="GameManagementMISModel.GameDiscounts" StoreEntitySet="GameDiscounts">
+            <EndProperty Name="Discounts">
+              <ScalarProperty Name="DiscountID" ColumnName="DiscountID" />
+            </EndProperty>
+            <EndProperty Name="Games">
+              <ScalarProperty Name="GameID" ColumnName="GameID" />
+            </EndProperty>
+          </AssociationSetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

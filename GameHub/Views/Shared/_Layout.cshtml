@@ -1,0 +1,314 @@
+@{
+    Layout = null;
+    var isAuth = (Session["IsAuthenticated"] as bool?) ?? false;
+    var userName = (Session["UserName"] as string) ?? "Guest";
+    var userType = (Session["UserType"] as string) ?? "";
+    var isAdmin = userType.Equals("Admin", StringComparison.OrdinalIgnoreCase);
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewBag.Title - GameHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="~/Content/Site.css" rel="stylesheet" />
+    @RenderSection("Styles", required: false)
+</head>
+<body class="app-dark">
+<nav class="navbar navbar-expand-lg navbar-dark top-navbar">
+<div class="container-fluid">
+<a class="navbar-brand d-flex align-items-center hover-accent" href="@Url.Action("Index", isAdmin ? "Admin" : "Games")">
+<span class="brand-text">GameHub</span>
+</a>
+<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+<span class="navbar-toggler-icon"></span>
+</button>
+<div class="collapse navbar-collapse" id="mainNav">
+<ul class="navbar-nav me-auto mb-2 mb-lg-0 main-links">
+@if (isAdmin) {
+<li class="nav-item"><a class="nav-link hover-accent" href="@Url.Action("Index","Admin")"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+<li class="nav-item"><a class="nav-link hover-accent" href="@Url.Action("Index","Games")"><i class="bi bi-controller"></i> Games</a></li>
+<li class="nav-item"><a class="nav-link hover-accent" href="@Url.Action("Index","Users")"><i class="bi bi-people"></i> Users</a></li>
+<li class="nav-item"><a class="nav-link hover-accent" href="@Url.Action("Index","Transactions")"><i class="bi bi-receipt"></i> Transactions</a></li>
+<li class="nav-item dropdown">
+<a class="nav-link dropdown-toggle hover-accent" href="#" role="button" data-bs-toggle="dropdown"><i class="bi bi-graph-up"></i> Reports</a>
+<ul class="dropdown-menu dropdown-menu-dark glassy">
+<li><a class="dropdown-item" href="@Url.Action("SalesSummary","Reports")">Sales Summary</a></li>
+<li><a class="dropdown-item" href="@Url.Action("ActivityLogs","Reports")">Activity Logs</a></li>
+</ul>
+</li>
+<li class="nav-item"><a class="nav-link hover-accent" href="@Url.Action("Index","BackupLogs")"><i class="bi bi-hdd"></i> Backups</a></li>
+} else {
+<li class="nav-item"><a class="nav-link hover-accent" href="@Url.Action("Index","Games")">Store</a></li>
+<li class="nav-item"><a class="nav-link hover-accent" href="@Url.Action("Index","UserLibraries")">Library</a></li>
+<li class="nav-item dropdown">
+<a class="nav-link dropdown-toggle hover-accent" href="#" role="button" data-bs-toggle="dropdown">Discover</a>
+<ul class="dropdown-menu dropdown-menu-dark glassy">
+<li><a class="dropdown-item" href="@Url.Action("Index","NewReleases")">New Releases</a></li>
+<li><a class="dropdown-item" href="@Url.Action("Index","TopSellers")">Top Sellers</a></li>
+<li><a class="dropdown-item" href="@Url.Action("Index","Upcoming")">Upcoming</a></li>
+</ul>
+</li>
+}
+</ul>
+@if (!isAdmin) {
+<form class="d-flex me-3 search-form position-relative" role="search" method="get" action="@Url.Action("Index","Games")">
+<div class="input-group" style="min-width:320px;">
+<input class="form-control form-control-dark search-anim" id="siteSearchInput" type="search" placeholder="Search games..." name="searchTerm" value="@(ViewBag.SearchTerm ?? String.Empty)" autocomplete="off" />
+<button class="btn btn-accent" type="submit"><i class="bi bi-search"></i></button>
+</div>
+
+<!-- Search dropdown container -->
+<div id="searchDropdown" class="search-dropdown" aria-hidden="true">
+    <div id="searchResultsContainer"></div>
+    <div id="searchFooter" class="search-footer">
+        <a id="seeAllLink" href="#" class="search-footer-link"><i class="bi bi-chevron-right"></i> See all results</a>
+    </div>
+</div>
+</form>
+}
+<ul class="navbar-nav mb-2 mb-lg-0">
+@if (isAuth) {
+<li class="nav-item dropdown">
+<a class="nav-link dropdown-toggle d-flex align-items-center hover-accent" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+<i class="bi bi-person-circle fs-4 me-2"></i>
+<span class="d-none d-sm-inline">@userName @if(isAdmin){<span class="badge bg-danger ms-1">Admin</span>}</span>
+</a>
+<ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark glassy">
+<li><a class="dropdown-item" href="@Url.Action("Logout","Account")"><i class="bi bi-box-arrow-right"></i> Sign Out</a></li>
+</ul>
+</li>
+} else {
+<li class="nav-item"><a class="btn btn-accent" href="@Url.Action("Login","Account")">Sign In</a></li>
+}
+</ul>
+</div>
+</div>
+</nav>
+
+<!-- Hidden anti-forgery token for AJAX posts -->
+<div id="antiForgeryToken" style="display:none">@Html.AntiForgeryToken()</div>
+
+<!-- Overlay for search focus -->
+<div id="searchOverlay" class="search-overlay" tabindex="-1"></div>
+
+<div class="container-fluid main-app">
+<div class="row">
+@if (!isAdmin) {
+<nav id="app-sidebar" class="col-lg-2 d-none d-lg-block sidebar">
+<div class="position-sticky pt-3">
+<h6 class="sidebar-heading">BROWSE</h6>
+<ul class="nav flex-column">
+<li class="nav-item"><a class="nav-link hover-accent" href="@Url.Action("Index","Games")"><i class="bi bi-grid"></i> All Games</a></li>
+<li class="nav-item"><a class="nav-link hover-accent" href="@Url.Action("Index","NewReleases")"><i class="bi bi-stars"></i> New Releases</a></li>
+<li class="nav-item"><a class="nav-link hover-accent" href="@Url.Action("Index","TopSellers")"><i class="bi bi-trophy"></i> Top Sellers</a></li>
+<li class="nav-item"><a class="nav-link hover-accent" href="@Url.Action("Index","Upcoming")"><i class="bi bi-calendar-event"></i> Upcoming</a></li>
+</ul>
+<h6 class="sidebar-heading mt-4">FILTERS</h6>
+<div class="px-2">@Html.Partial("~/Views/Shared/_GenreFilter.cshtml")</div>
+</div>
+</nav>
+}
+<main class="@(isAdmin ? "col-12" : "col-lg-10 ms-sm-auto") px-4 content-area" role="main">
+@RenderBody()
+</main>
+</div>
+</div>
+<footer class="site-footer text-muted">
+<div class="container"><p class="mb-0">&copy; @DateTime.Now.Year - GameHub @if(isAdmin){<span class="text-warning">| Admin Panel</span>}</p></div>
+</footer>
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080"><div id="toastContainer" class="toast-container"></div></div>
+@if (!isAuth) {
+<div class="modal fade" id="loginModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content glassy">
+<div class="modal-header border-0">
+<h5 class="modal-title"><i class="bi bi-lock"></i> Login Required</h5>
+<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+</div>
+<div class="modal-body text-center">
+<p class="lead">Please sign in to add games to your library.</p>
+<a href="@Url.Action("Login","Account")" class="btn btn-accent btn-lg">Sign In</a>
+<a href="@Url.Action("Register","Account")" class="btn btn-secondary btn-lg ms-2">Register</a>
+</div>
+</div>
+</div>
+</div>
+}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+var isAuthenticated = @Json.Encode(isAuth);
+var isAdmin = @Json.Encode(isAdmin);
+function showToast(message, type){
+var bgClass = type === 'error' ? 'text-bg-danger' : 'text-bg-dark';
+var toast = document.createElement('div');
+toast.className = 'toast align-items-center ' + bgClass + ' border-0 show glassy';
+toast.setAttribute('role','alert');
+toast.innerHTML = '<div class="d-flex"><div class="toast-body">'+message+'</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>';
+document.getElementById('toastContainer').appendChild(toast);
+setTimeout(function(){ toast.remove(); }, 5000);
+}
+function requireLogin(){
+if(!isAuthenticated){
+var modal = new bootstrap.Modal(document.getElementById('loginModal'));
+modal.show();
+return false;
+}
+return true;
+}
+(function(){
+var msg = '@(TempData["PurchaseSuccess"] ?? TempData["PurchaseError"] ?? TempData["ToastSuccess"] ?? TempData["ToastError"] ?? TempData["LoginError"] ?? TempData["RegisterSuccess"])';
+if(msg){ showToast(msg, '@(TempData["PurchaseError"] ?? TempData["ToastError"] ?? TempData["LoginError"])' ? 'error' : 'success'); }
+})();
+</script>
+
+<!-- Search dropdown JS -->
+<script>
+(function(){
+    var $input = $('#siteSearchInput');
+    var $dropdown = $('#searchDropdown');
+    var $results = $('#searchResultsContainer');
+    var $overlay = $('#searchOverlay');
+    var $seeAll = $('#seeAllLink');
+    var typingTimer = null;
+    var debounce = 250;
+
+    function getAntiForgeryToken(){
+        return $('#antiForgeryToken input[name="__RequestVerificationToken"]').val();
+    }
+
+    function openDropdown(){
+        $dropdown.addClass('active').attr('aria-hidden','false');
+        $overlay.addClass('active');
+    }
+    function closeDropdown(){
+        $dropdown.removeClass('active').attr('aria-hidden','true');
+        $overlay.removeClass('active');
+    }
+
+    function renderResults(data, query){
+        $results.empty();
+        if (!data || !data.length){
+            $results.append('<div class="search-no-results"><i class="bi bi-search"></i><div>No games found</div></div>');
+            $seeAll.attr('href', '@Url.Action("Index","Games")?searchTerm='+encodeURIComponent(query));
+            return;
+        }
+
+        data.forEach(function(g){
+            var title = $('<div>').addClass('search-result-title').text(g.title);
+            var meta = $('<div>').addClass('search-result-meta');
+            meta.append($('<span>').addClass('search-result-genre').text(g.genre));
+            meta.append($('<span>').text(g.releaseDate ? (new Date(g.releaseDate)).getFullYear() : '')); 
+
+            var info = $('<div>').addClass('search-result-info');
+            info.append(title).append(meta);
+
+            var thumb = $('<img>').addClass('search-result-thumbnail').attr('src', g.coverUrl).on('error', function(){ $(this).attr('src','/Content/cover-placeholder.jpg'); });
+
+            var priceText = g.price != null ? ('$'+parseFloat(g.price).toFixed(2)) : '';
+            var price = $('<div>').addClass('search-result-price').text(priceText);
+
+            var actions = $('<div>').addClass('search-result-actions');
+            var details = $('<a>').addClass('search-result-btn').attr('href', g.detailsUrl).text('View Details');
+            actions.append(details);
+
+            if (isAuthenticated) {
+                var addBtn = $('<a href="#">').addClass('search-result-btn add-to-library-btn').attr('data-game-id', g.gameId).text('Add to Wishlist');
+                actions.append(addBtn);
+            }
+
+            var row = $('<a>').addClass('search-result-item').attr('href', g.detailsUrl);
+            row.append(thumb).append(info).append(price).append(actions);
+
+            // clicking the add button should not navigate to details
+            row.find('.add-to-library-btn').on('click', function(ev){
+                ev.preventDefault();
+                ev.stopPropagation();
+                var gameId = $(this).data('game-id');
+                var $btn = $(this);
+                $btn.text('Adding...').prop('disabled', true);
+                $.ajax({
+                    url: '@Url.Action("AddToLibrary","Games")',
+                    type: 'POST',
+                    data: { gameId: gameId, __RequestVerificationToken: getAntiForgeryToken() },
+                    dataType: 'json',
+                    success: function(resp){
+                        if (resp && resp.success){
+                            $btn.text('In Wishlist').addClass('btn-disabled');
+                        } else {
+                            $btn.text('Add to Wishlist').prop('disabled', false);
+                            showToast(resp.message || 'Failed to add', 'error');
+                        }
+                    },
+                    error: function(){
+                        $btn.text('Add to Wishlist').prop('disabled', false);
+                        showToast('Failed to add', 'error');
+                    }
+                });
+            });
+
+            $results.append(row);
+        });
+
+        $seeAll.attr('href', '@Url.Action("Index","Games")?searchTerm='+encodeURIComponent(query));
+    }
+
+    function doSearch(q){
+        if (!q || q.length < 1){
+            $results.empty();
+            renderResults([], q);
+            return;
+        }
+        $results.html('<div class="search-loading"><div class="search-spinner"></div></div>');
+        openDropdown();
+        $.ajax({
+            url: '@Url.Action("SearchGames","Games")',
+            data: { query: q },
+            dataType: 'json',
+            success: function(resp){
+                if (resp && resp.success){
+                    renderResults(resp.results, q);
+                } else {
+                    renderResults([], q);
+                }
+            },
+            error: function(){
+                renderResults([], q);
+            }
+        });
+    }
+
+    $input.on('input', function(){
+        var val = $(this).val();
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(function(){ doSearch(val); }, debounce);
+        if (val.length === 0){
+            // close after short delay
+            setTimeout(closeDropdown, 150);
+        } else {
+            openDropdown();
+        }
+    });
+
+    // Close when clicking outside
+    $overlay.on('click', function(){ closeDropdown(); });
+    $(document).on('click', function(e){
+        var target = $(e.target);
+        if (!target.closest('.search-form').length && !target.closest('#searchDropdown').length){
+            closeDropdown();
+        }
+    });
+
+    // Escape key closes
+    $(document).on('keydown', function(e){ if (e.key === 'Escape') closeDropdown(); });
+
+})();
+</script>
+
+@RenderSection("Scripts", required: false)
+</body>
+</html>

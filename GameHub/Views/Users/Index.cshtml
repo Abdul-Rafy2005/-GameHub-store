@@ -1,0 +1,61 @@
+﻿@model IEnumerable<GameHub.Models.User>
+@{ ViewBag.Title = "Users"; }
+
+<div class="hero-banner" style="background-image:url('/Content/hero-placeholder.jpg')">
+    <div class="overlay">
+        <h1 class="display-6"><i class="bi bi-people"></i> User Management</h1>
+        <p class="lead">Manage user accounts and permissions</p>
+    </div>
+</div>
+
+<div class="panel-dark mb-3">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-0"><i class="bi bi-person-badge"></i> Total Users: @Model.Count()</h5>
+        </div>
+        <div>
+            @Html.ActionLink("Create New User", "Create", null, new { @class = "btn btn-accent" })
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive panel-dark">
+    <table class="table table-dark table-hover align-middle mb-0">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Joined</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var u in Model)
+        {
+            <tr>
+                <td><strong>@u.FullName</strong></td>
+                <td><code class="text-info">@u.Email</code></td>
+                <td><span class="badge @(u.UserType == "Admin" ? "bg-danger" : "bg-primary")">@u.UserType</span></td>
+                <td><span class="badge @(u.IsActive == true ? "bg-success" : "bg-secondary")">@(u.IsActive == true ? "Active" : "Inactive")</span></td>
+                <td>@(u.JoinDate?.ToString("MMM dd, yyyy") ?? "N/A")</td>
+                <td class="text-end">
+                    <a href="@Url.Action("ResetPassword","UserManagement", new { id = u.UserID })" class="btn btn-warning btn-sm" title="Reset Password">
+                        <i class="bi bi-key"></i>
+                    </a>
+                    @Html.ActionLink("Edit", "Edit", new { id = u.UserID }, new { @class = "btn btn-primary btn-sm" })
+                    @Html.ActionLink("Details", "Details", new { id = u.UserID }, new { @class = "btn btn-secondary btn-sm" })
+                    @Html.ActionLink("Delete", "Delete", new { id = u.UserID }, new { @class = "btn btn-danger btn-sm" })
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<div class="panel-dark mt-3">
+    <h6><i class="bi bi-info-circle"></i> Password Information</h6>
+    <p class="text-muted mb-2">All passwords are stored securely using Base64 encoding. Users registered through the system have properly formatted passwords.</p>
+    <p class="text-muted mb-0"><strong>Note:</strong> If a user can't login, use the <i class="bi bi-key"></i> Reset Password button to set a new password.</p>
+</div>

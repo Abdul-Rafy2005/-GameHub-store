@@ -1,0 +1,493 @@
+﻿@model IEnumerable<GameHub.Models.Game>
+@{
+    ViewBag.Title = "Store";
+    var isAuth = (Session["IsAuthenticated"] as bool?) ?? false;
+    var isAdmin = ((Session["UserType"] as string) ?? "").Equals("Admin", StringComparison.OrdinalIgnoreCase);
+    var userLibrary = ViewBag.UserLibrary as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var gameDiscounts = ViewBag.GameDiscounts as Dictionary<int, decimal> ?? new Dictionary<int, decimal>();
+    var featuredGames = ViewBag.FeaturedGames as List<GameHub.Models.Game> ?? new List<GameHub.Models.Game>();
+    var topSellerIds = ViewBag.TopSellerIds as List<int> ?? new List<int>();
+    var newReleaseIds = ViewBag.NewReleaseIds as List<int> ?? new List<int>();
+    
+    // Check if any filters are active
+    var hasFilters = !string.IsNullOrEmpty(ViewBag.SearchTerm as string) 
+                  || (ViewBag.GenreFilter != null && ViewBag.GenreFilter > 0)
+                  || (ViewBag.FreeOnly != null && ViewBag.FreeOnly == true)
+                  || ViewBag.MinPrice != null
+                  || ViewBag.MaxPrice != null;
+    
+    var showHero = !isAdmin && !hasFilters && featuredGames.Any();
+}
+
+@if (showHero)
+{
+    <!-- Hero Carousel Banner -->
+    <div id="heroCarousel" class="carousel slide hero-carousel" data-bs-ride="carousel" data-bs-interval="5000">
+        <div class="carousel-indicators">
+            @for (int i = 0; i < featuredGames.Count; i++)
+            {
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")"></button>
+            }
+        </div>
+        <div class="carousel-inner">
+            @for (int i = 0; i < featuredGames.Count; i++)
+            {
+                var game = featuredGames[i];
+                var hasDiscount = gameDiscounts.ContainsKey(game.GameID);
+                var discountPercent = hasDiscount ? gameDiscounts[game.GameID] : 0;
+                var discountedPrice = hasDiscount ? game.Price * (1 - discountPercent / 100) : game.Price;
+                var status = userLibrary.ContainsKey(game.GameID) ? userLibrary[game.GameID] : "none";
+                
+                <div class="carousel-item @(i == 0 ? "active" : "")">
+                    <div class="hero-slide" style="background-image: linear-gradient(to right, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 40%, rgba(0,0,0,0.3) 70%, transparent 100%), url('/Content/banners/@(game.GameID).jpg');">
+                        <div class="hero-content">
+                            <div class="hero-layout">
+                                <!-- Left Side: Info -->
+                                <div class="hero-text">
+                                    @if (hasDiscount) { <div class="hero-special-badge"><i class="bi bi-fire"></i> SPECIAL OFFER</div> }
+                                    @if (newReleaseIds.Contains(game.GameID)) { <div class="hero-new-badge"><i class="bi bi-stars"></i> NEW RELEASE</div> }
+                                    <h1 class="hero-title">@game.Title</h1>
+                                    <div class="hero-meta">
+                                        <span class="hero-genre"><i class="bi bi-tag"></i> @(game.Genre1?.GenreName ?? "Adventure")</span>
+                                        @if (game.Rating.HasValue && game.Rating > 0)
+                                        {
+                                            <span class="hero-rating"><i class="bi bi-star-fill"></i> @game.Rating.Value.ToString("0.0")</span>
+                                        }
+                                    </div>
+                                    <p class="hero-description">@(game.Description?.Length > 200 ? game.Description.Substring(0, 200) + "..." : game.Description)</p>
+                                    <div class="hero-pricing">
+                                        @if (hasDiscount)
+                                        {
+                                            <div class="hero-discount-badge">-@discountPercent%</div>
+                                            <div class="hero-prices">
+                                                <span class="hero-original-price">$@game.Price</span>
+                                                <span class="hero-final-price">$@discountedPrice.ToString("0.00")</span>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="hero-price-single">$@game.Price</div>
+                                        }
+                                    </div>
+                                    <div class="hero-actions">
+                                        @if (status == "owned")
+                                        {
+                                            <a href="@Url.Action("Details", "Games", new { id = game.GameID })" class="btn-hero btn-hero-secondary"><i class="bi bi-check-circle"></i> Owned - View Details</a>
+                                        }
+                                        else if (status == "wishlist")
+                                        {
+                                            <a href="@Url.Action("Index", "UserLibraries")" class="btn-hero btn-hero-primary"><i class="bi bi-credit-card"></i> Buy Now</a>
+                                            <a href="@Url.Action("Details", "Games", new { id = game.GameID })" class="btn-hero btn-hero-secondary">View Details</a>
+                                        }
+                                        else
+                                        {
+                                            if (isAuth)
+                                            {
+                                                using (Html.BeginForm("AddToLibrary", "Games", FormMethod.Post, new { @class = "d-inline hero-form" }))
+                                                {
+                                                    @Html.AntiForgeryToken()
+                                                    @Html.Hidden("gameId", game.GameID)
+                                                    <button type="submit" class="btn-hero btn-hero-primary"><i class="bi bi-plus-circle"></i> Add to Wishlist</button>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="btn-hero btn-hero-primary" onclick="requireLogin()"><i class="bi bi-lock"></i> Add to Wishlist</button>
+                                            }
+                                            <a href="@Url.Action("Details", "Games", new { id = game.GameID })" class="btn-hero btn-hero-secondary">View Details</a>
+                                        }
+                                    </div>
+                                </div>
+                                
+                                <!-- Right Side: Game Poster -->
+                                <div class="hero-poster">
+                                    <div class="hero-poster-frame">
+                                        <img src="/Content/covers/@(game.GameID).jpg" alt="@game.Title" onerror="this.src='/Content/cover-placeholder.jpg'" class="hero-poster-img" />
+                                        @if (hasDiscount)
+                                        {
+                                            <div class="hero-poster-discount">-@discountPercent%</div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        </button>
+    </div>
+}
+else if (isAdmin)
+{
+    <div class="hero-banner" style="background-image:url('/Content/hero-placeholder.jpg')">
+        <div class="overlay">
+            <h1 class="display-5">Game Management</h1>
+            <p class="lead">Manage your game catalog</p>
+            <a href="@Url.Action("Create","Games")" class="btn btn-accent btn-lg"><i class="bi bi-plus-circle"></i> Add New Game</a>
+        </div>
+    </div>
+}
+else if (hasFilters)
+{
+    <!-- Filtered View Header -->
+    <div class="filtered-header">
+        <div class="container-xl">
+            <h2 class="filtered-title"><i class="bi bi-funnel"></i> Filtered Results</h2>
+            <div class="active-filters">
+                @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
+                {
+                    <span class="filter-badge">Search: "@ViewBag.SearchTerm"</span>
+                }
+                @if (ViewBag.GenreFilter != null && ViewBag.GenreFilter > 0)
+                {
+                    var genres = ViewBag.GenresItems as IEnumerable<GameHub.Models.Genre> ?? new List<GameHub.Models.Genre>();
+                    var selectedGenre = genres.FirstOrDefault(g => g.GenreID == ViewBag.GenreFilter);
+                    if (selectedGenre != null)
+                    {
+                        <span class="filter-badge">Genre: @selectedGenre.GenreName</span>
+                    }
+                }
+                @if (ViewBag.FreeOnly == true)
+                {
+                    <span class="filter-badge">Free Games Only</span>
+                }
+                @if (ViewBag.MinPrice != null || ViewBag.MaxPrice != null)
+                {
+                    <span class="filter-badge">
+                        Price: 
+                        @if (ViewBag.MinPrice != null) { <text>$@ViewBag.MinPrice</text> }
+                        @if (ViewBag.MinPrice != null && ViewBag.MaxPrice != null) { <text> - </text> }
+                        @if (ViewBag.MaxPrice != null) { <text>$@ViewBag.MaxPrice</text> }
+                    </span>
+                }
+                <a href="@Url.Action("Index", "Games")" class="btn btn-sm btn-secondary ms-2"><i class="bi bi-x-circle"></i> Clear All Filters</a>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Store Catalog Section -->
+<div class="store-section">
+    @if (Model == null || !Model.Any())
+    {
+        <div class="panel-dark text-center py-5">
+            <i class="bi bi-inbox display-1 text-muted"></i>
+            <h3 class="mt-3">No Games Available</h3>
+            @if (hasFilters)
+            {
+                <p class="text-muted">No games match your current filters. Try adjusting your search criteria.</p>
+                <a href="@Url.Action("Index","Games")" class="btn btn-accent mt-3"><i class="bi bi-x-circle"></i> Clear Filters</a>
+            }
+            else
+            {
+                <p class="text-muted">Check back later for new releases!</p>
+                if (isAdmin)
+                {
+                    <a href="@Url.Action("Create","Games")" class="btn btn-accent mt-3"><i class="bi bi-plus-circle"></i> Add Your First Game</a>
+                }
+            }
+        </div>
+    }
+    else
+    {
+        <div class="catalog-header">
+            <h2 class="catalog-title"><i class="bi bi-grid"></i> @(hasFilters ? "Filtered Games" : "Browse Games")</h2>
+            <div class="catalog-count">Showing @Model.Count() game@(Model.Count() != 1 ? "s" : "")</div>
+        </div>
+
+        <div class="games-grid-modern">
+        @foreach (var game in Model)
+        {
+            var status = userLibrary.ContainsKey(game.GameID) ? userLibrary[game.GameID] : "none";
+            var hasDiscount = gameDiscounts.ContainsKey(game.GameID);
+            var discountPercent = hasDiscount ? gameDiscounts[game.GameID] : 0;
+            var discountedPrice = hasDiscount ? game.Price * (1 - discountPercent / 100) : game.Price;
+            var isTopSeller = topSellerIds.Contains(game.GameID);
+            var isNewRelease = newReleaseIds.Contains(game.GameID);
+
+            <div class="game-card-modern @(status == "owned" ? "owned-game" : "")" data-game-id="@game.GameID">
+                <!-- Badges -->
+                <div class="card-badges">
+                    @if (hasDiscount) { <div class="badge-discount">-@discountPercent%</div> }
+                    @if (isTopSeller) { <div class="badge-top-seller"><i class="bi bi-trophy-fill"></i> Top Seller</div> }
+                    @if (isNewRelease) { <div class="badge-new"><i class="bi bi-stars"></i> New</div> }
+                    @if (status == "owned") { <div class="badge-owned"><i class="bi bi-check-circle-fill"></i> Owned</div> }
+                </div>
+                
+                <!-- Cover Image -->
+                <div class="card-cover-wrapper">
+                    <img src="/Content/covers/@(game.GameID).jpg" class="card-cover" alt="@game.Title" onerror="this.src='/Content/cover-placeholder.jpg'" />
+                    <div class="card-hover-overlay">
+                        <div class="hover-quick-info">
+                            @if (game.Rating.HasValue && game.Rating > 0)
+                            {
+                                <div class="hover-rating"><i class="bi bi-star-fill"></i> @game.Rating.Value.ToString("0.0") / 5</div>
+                            }
+                            <div class="hover-genre">@(game.Genre1?.GenreName ?? "Adventure")</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card Body -->
+                <div class="card-body-modern">
+                    <h3 class="card-title-modern">@game.Title</h3>
+                    
+                    <!-- Pricing -->
+                    <div class="card-pricing">
+                        @if (hasDiscount)
+                        {
+                            <div class="pricing-discount">
+                                <span class="pricing-original">$@game.Price</span>
+                                <span class="pricing-final">$@discountedPrice.ToString("0.00")</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="pricing-single">$@game.Price</div>
+                        }
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="card-actions-modern">
+                        @if (isAdmin)
+                        {
+                            <a href="@Url.Action("Edit","Games", new { id = game.GameID })" class="btn-card btn-card-sm btn-card-warning"><i class="bi bi-pencil"></i></a>
+                            <a href="@Url.Action("Details","Games", new { id = game.GameID })" class="btn-card btn-card-sm btn-card-secondary"><i class="bi bi-eye"></i></a>
+                            <a href="@Url.Action("Delete","Games", new { id = game.GameID })" class="btn-card btn-card-sm btn-card-danger"><i class="bi bi-trash"></i></a>
+                        }
+                        else
+                        {
+                            if (status == "owned")
+                            {
+                                <a href="@Url.Action("Details","Games", new { id = game.GameID })" class="btn-card btn-card-full btn-card-owned"><i class="bi bi-check-circle"></i> Owned</a>
+                            }
+                            else if (status == "wishlist")
+                            {
+                                <a href="@Url.Action("Index","UserLibraries")" class="btn-card btn-card-full btn-card-primary"><i class="bi bi-credit-card"></i> Buy Now</a>
+                            }
+                            else
+                            {
+                                if (isAuth)
+                                {
+                                    using (Html.BeginForm("AddToLibrary", "Games", FormMethod.Post, new { @class = "w-100 library-form-modern" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        @Html.Hidden("gameId", game.GameID)
+                                        <button type="submit" class="btn-card btn-card-full btn-card-primary">
+                                            <i class="bi bi-plus-circle"></i> Add to Wishlist
+                                        </button>
+                                    }
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn-card btn-card-full btn-card-primary" onclick="requireLogin()">
+                                        <i class="bi bi-lock"></i> Add to Wishlist
+                                    </button>
+                                }
+                            }
+                            <a href="@Url.Action("Details","Games", new { id = game.GameID })" class="btn-card btn-card-sm btn-card-secondary mt-2"><i class="bi bi-info-circle"></i> Details</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+$(document).ready(function() {
+    // Hero form AJAX submission
+    $('.hero-form').on('submit', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        var btn = form.find('button[type="submit"]');
+        btn.prop('disabled', true).html('<i class="bi bi-hourglass-split"></i> Adding...');
+        
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    btn.html('<i class="bi bi-check-circle"></i> Added to Wishlist');
+                    showToast(response.message || 'Added to wishlist!', 'success');
+                    setTimeout(function(){ location.reload(); }, 1500);
+                } else {
+                    showToast(response.message || 'Failed to add.', 'error');
+                    btn.prop('disabled', false).html('<i class="bi bi-plus-circle"></i> Add to Wishlist');
+                }
+            },
+            error: function() {
+                showToast('Failed. Please try again.', 'error');
+                btn.prop('disabled', false).html('<i class="bi bi-plus-circle"></i> Add to Wishlist');
+            }
+        });
+    });
+
+    // Card form AJAX submission
+    $('.library-form-modern').on('submit', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        var btn = form.find('button[type="submit"]');
+        btn.prop('disabled', true).html('<i class="bi bi-hourglass-split"></i> Adding...');
+        
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    form.replaceWith('<button class="btn-card btn-card-full btn-card-secondary" disabled><i class="bi bi-bookmark-check"></i> In Wishlist</button>');
+                    showToast(response.message || 'Added to wishlist!', 'success');
+                } else {
+                    showToast(response.message || 'Failed.', 'error');
+                    btn.prop('disabled', false).html('<i class="bi bi-plus-circle"></i> Add to Wishlist');
+                }
+            },
+            error: function() {
+                showToast('Failed. Please try again.', 'error');
+                btn.prop('disabled', false).html('<i class="bi bi-plus-circle"></i> Add to Wishlist');
+            }
+        });
+    });
+});
+</script>
+}
+
+@section Styles {
+<style>
+/* Hero Carousel Styles */
+.hero-carousel { margin:0; padding:0; position:relative; overflow:hidden; }
+.hero-slide { height:680px; background-size:cover; background-position:center center; background-repeat:no-repeat; position:relative; display:flex; align-items:center; }
+.hero-content { max-width:1600px; width:100%; margin:0 auto; padding:60px 40px; height:100%; display:flex; align-items:center; }
+.hero-layout { display:flex; gap:60px; align-items:center; justify-content:space-between; width:100%; }
+.hero-text { flex:1; max-width:700px; }
+.hero-special-badge, .hero-new-badge { display:inline-block; background:linear-gradient(135deg,#e74c3c,#c0392b); color:#fff; font-weight:700; font-size:.75rem; padding:6px 14px; border-radius:4px; margin-bottom:10px; text-transform:uppercase; letter-spacing:1px; animation:pulse 2s infinite; }
+.hero-new-badge { background:linear-gradient(135deg,#3498db,#2980b9); }
+.hero-title { font-size:3.8rem; font-weight:800; color:#fff; margin-bottom:14px; text-shadow:0 4px 12px rgba(0,0,0,0.8); line-height:1.1; }
+.hero-meta { display:flex; gap:20px; margin-bottom:18px; font-size:.95rem; }
+.hero-genre, .hero-rating { color:#b8c9d9; font-weight:600; }
+.hero-description { color:#c9dae8; font-size:1.05rem; line-height:1.6; margin-bottom:28px; max-width:620px; text-shadow:0 2px 6px rgba(0,0,0,0.6); }
+.hero-pricing { display:flex; align-items:center; gap:18px; margin-bottom:32px; }
+.hero-discount-badge { background:linear-gradient(135deg,#27ae60,#229954); color:#fff; font-size:1.9rem; font-weight:800; padding:12px 20px; border-radius:6px; box-shadow:0 4px 12px rgba(39,174,96,0.4); }
+.hero-prices { display:flex; flex-direction:column; }
+.hero-original-price { color:#8ca5b6; text-decoration:line-through; font-size:1.15rem; }
+.hero-final-price { color:#9fd7b4; font-size:2.4rem; font-weight:800; text-shadow:0 2px 8px rgba(0,0,0,0.6); }
+.hero-price-single { color:#9fd7b4; font-size:2.4rem; font-weight:800; text-shadow:0 2px 8px rgba(0,0,0,0.6); }
+.hero-actions { display:flex; gap:12px; flex-wrap:wrap; }
+.btn-hero { padding:16px 32px; font-size:1.1rem; font-weight:700; border-radius:4px; border:none; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:all .3s; text-transform:uppercase; letter-spacing:0.5px; box-shadow:0 4px 12px rgba(0,0,0,0.4); }
+.btn-hero-primary { background:linear-gradient(135deg,#66c0f4,#4fa3d1); color:#0e1621; }
+.btn-hero-primary:hover { background:linear-gradient(135deg,#7fd4ff,#66c0f4); transform:translateY(-2px); box-shadow:0 6px 16px rgba(102,192,244,0.5); }
+.btn-hero-secondary { background:rgba(255,255,255,0.15); color:#fff; backdrop-filter:blur(10px); }
+.btn-hero-secondary:hover { background:rgba(255,255,255,0.25); transform:translateY(-2px); }
+
+/* Hero Poster on Right */
+.hero-poster { flex-shrink:0; width:420px; height:560px; display:flex; align-items:center; }
+.hero-poster-frame { position:relative; width:100%; height:100%; border-radius:12px; overflow:hidden; box-shadow:0 16px 48px rgba(0,0,0,0.7); border:2px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.3); transform:perspective(800px) rotateY(-5deg); transition:transform .4s; }
+.hero-slide:hover .hero-poster-frame { transform:perspective(800px) rotateY(0deg) scale(1.02); }
+.hero-poster-img { width:100%; height:100%; object-fit:cover; object-position:center; display:block; }
+.hero-poster-discount { position:absolute; top:20px; right:20px; background:linear-gradient(135deg,#e74c3c,#c0392b); color:#fff; font-size:2rem; font-weight:800; padding:14px 20px; border-radius:8px; box-shadow:0 6px 20px rgba(231,76,60,0.6); animation:pulse 2s infinite; }
+
+.carousel-control-prev, .carousel-control-next { width:60px; opacity:0.7; }
+.carousel-control-prev:hover, .carousel-control-next:hover { opacity:1; }
+.carousel-indicators { margin-bottom:0; }
+.carousel-indicators button { width:60px; height:4px; border-radius:2px; background:rgba(255,255,255,0.4); }
+.carousel-indicators button.active { background:#66c0f4;}
+
+/* Filtered View Header */
+.filtered-header { background:rgba(20,26,32,0.95); border-bottom:2px solid rgba(102,192,244,0.3); padding:30px 0; margin-bottom:30px; }
+.filtered-title { font-size:1.8rem; font-weight:700; color:#e6f4ff; margin:0 0 12px; }
+.active-filters { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.filter-badge { background:rgba(102,192,244,0.2); color:#66c0f4; border:1px solid rgba(102,192,244,0.4); padding:6px 14px; border-radius:20px; font-size:.85rem; font-weight:600; }
+
+/* Store Catalog Section */
+.store-section { max-width:1600px; margin:40px auto; padding:0 20px; }
+.catalog-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; padding-bottom:16px; border-bottom:2px solid rgba(102,192,244,0.3); }
+.catalog-title { font-size:1.8rem; font-weight:700; color:#e6f4ff; margin:0; }
+.catalog-count { color:#8fa5b8; font-size:1rem; }
+
+/* Modern Game Cards */
+.games-grid-modern { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:24px; }
+.game-card-modern { background:rgba(20,26,32,0.95); border:1px solid rgba(255,255,255,0.06); border-radius:12px; overflow:hidden; transition:all .3s; position:relative; }
+.game-card-modern:hover { transform:translateY(-8px); box-shadow:0 12px 32px rgba(102,192,244,0.25); border-color:rgba(102,192,244,0.4); }
+.game-card-modern.owned-game { border-color:rgba(46,204,113,0.4); }
+
+/* Card Badges */
+.card-badges { position:absolute; top:10px; left:10px; right:10px; z-index:10; display:flex; flex-wrap:wrap; gap:6px; }
+.badge-discount { background:linear-gradient(135deg,#e74c3c,#c0392b); color:#fff; font-weight:800; font-size:.9rem; padding:6px 10px; border-radius:4px; box-shadow:0 4px 8px rgba(231,76,60,0.4); animation:pulse 2s infinite; }
+.badge-top-seller { background:linear-gradient(135deg,#f39c12,#d68910); color:#fff; font-weight:700; font-size:.7rem; padding:4px 8px; border-radius:4px; }
+.badge-new { background:linear-gradient(135deg,#3498db,#2980b9); color:#fff; font-weight:700; font-size:.7rem; padding:4px 8px; border-radius:4px; }
+.badge-owned { background:rgba(46,204,113,0.9); color:#fff; font-weight:700; font-size:.7rem; padding:4px 8px; border-radius:4px; }
+
+/* Card Cover */
+.card-cover-wrapper { position:relative; overflow:hidden; height:340px; }
+.card-cover { width:100%; height:100%; object-fit:cover; object-position:center; transition:transform .3s; }
+.game-card-modern:hover .card-cover { transform:scale(1.05); }
+.card-hover-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,transparent 60%); opacity:0; transition:opacity .3s; display:flex; align-items:flex-end; padding:12px; }
+.game-card-modern:hover .card-hover-overlay { opacity:1; }
+.hover-quick-info { width:100%; }
+.hover-rating { color:#f1c40f; font-weight:700; font-size:.85rem; margin-bottom:4px; }
+.hover-genre { color:#9fb4c9; font-size:.75rem; }
+
+/* Card Body */
+.card-body-modern { padding:14px; }
+.card-title-modern { font-size:1.05rem; font-weight:700; color:#e6f4ff; margin:0 0 12px; min-height:48px; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.card-pricing { margin-bottom:12px; min-height:32px; display:flex; align-items:center; }
+.pricing-discount { display:flex; flex-direction:column; }
+.pricing-original { color:#8ca5b6; text-decoration:line-through; font-size:.85rem; }
+.pricing-final { color:#9fd7b4; font-size:1.3rem; font-weight:800; }
+.pricing-single { color:#e6f4ff; font-size:1.2rem; font-weight:700; }
+
+/* Card Actions */
+.card-actions-modern { display:flex; flex-direction:column; gap:6px; }
+.btn-card { padding:10px 16px; font-size:.9rem; font-weight:600; border-radius:6px; border:none; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:6px; transition:all .2s; text-align:center; }
+.btn-card-full { width:100%; }
+.btn-card-sm { flex:1; }
+.btn-card-primary { background:linear-gradient(135deg,#66c0f4,#4fa3d1); color:#0e1621; }
+.btn-card-primary:hover { background:linear-gradient(135deg,#7fd4ff,#66c0f4); transform:translateY(-2px); box-shadow:0 4px 12px rgba(102,192,244,0.4); }
+.btn-card-secondary { background:rgba(255,255,255,0.1); color:#c9dae8; }
+.btn-card-secondary:hover { background:rgba(255,255,255,0.15); }
+.btn-card-owned { background:rgba(46,204,113,0.2); color:#2ecc71; border:1px solid rgba(46,204,113,0.4); cursor:default; }
+.btn-card-warning { background:rgba(241,196,15,0.2); color:#f1c40f; }
+.btn-card-danger { background:rgba(231,76,60,0.2); color:#e74c3c; }
+
+/* Animations */
+@@keyframes pulse {
+    0%, 100% { opacity:1; }
+    50% { opacity:0.85; }
+}
+
+/* Responsive */
+@@media (max-width: 1400px) {
+    .hero-poster { width:360px; }
+    .hero-poster-img { height:480px; }
+}
+@@media (max-width: 992px) {
+    .hero-slide { height:auto; min-height:500px; }
+    .hero-layout { flex-direction:column; gap:30px; }
+    .hero-poster { width:100%; max-width:400px; }
+    .hero-poster-img { height:520px; }
+    .hero-poster-frame { transform:none; }
+    .hero-title { font-size:2.5rem; }
+    .games-grid-modern { grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:18px; }
+}
+@@media (max-width: 576px) {
+    .hero-slide { min-height:auto; }
+    .hero-content { padding:30px 20px; }
+    .hero-title { font-size:1.8rem; }
+    .hero-poster { max-width:100%; }
+    .hero-poster-img { height:400px; }
+    .games-grid-modern { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
+}
+</style>
+}

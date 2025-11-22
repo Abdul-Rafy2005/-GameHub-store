@@ -1,0 +1,56 @@
+@model GameHub.Controllers.CheckoutViewModel
+@{
+    ViewBag.Title = "Checkout";
+}
+<div class="page-header">
+    <h2>Checkout</h2>
+    <p class="text-muted">@Model.GameTitle</p>
+</div>
+
+@using (Html.BeginForm("Purchase", "Transactions", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.GameID)
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Order Summary</div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Buyer</label>
+                        @Html.DropDownList("userId", (SelectList)ViewBag.Users, new { @class = "form-control" })
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Method</label>
+                        <select class="form-control" name="paymentMethod">
+                            <option value="Card" selected>Card</option>
+                            <option value="PayPal">PayPal</option>
+                            <option value="Wallet">Wallet</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Discount Code</label>
+                        <div class="input-group">
+                            <input type="text" name="discountCode" class="form-control" value="@Model.DiscountCode" placeholder="Enter promo code" />
+                            <span class="input-group-btn">
+                                <button type="submit" formaction="@Url.Action("Checkout", "Transactions", new { gameId = Model.GameID })" formmethod="get" class="btn btn-default">Apply</button>
+                            </span>
+                        </div>
+                        <span class="help-block">Optional. Applies if valid and active.</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <ul class="list-group">
+                        <li class="list-group-item">Original Price <span class="pull-right">$@Model.OriginalPrice</span></li>
+                        <li class="list-group-item">Discount (@Model.DiscountPercent%) <span class="pull-right">-$@Model.DiscountAmount</span></li>
+                        <li class="list-group-item list-group-item-info"><strong>Total</strong> <span class="pull-right"><strong>$@Model.FinalPrice</strong></span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="text-right">
+                <button type="submit" class="btn btn-primary">Confirm Purchase</button>
+            </div>
+        </div>
+    </div>
+}
