@@ -1,136 +1,155 @@
-```markdown
-# 🎮 GameHub-store
+# GameHub Store
 
-[![build](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/Abdul-Rafy2005/GameHub-store/actions)
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![stars](https://img.shields.io/github/stars/Abdul-Rafy2005/GameHub-store?style=social)](https://github.com/Abdul-Rafy2005/GameHub-store/stargazers)
+A web storefront for video games built with ASP.NET MVC 5 targeting .NET Framework 4.8. GameHub lets users browse and search game listings, view details and screenshots, add games to a wishlist/library, and manage games from an admin UI. This repository contains the MVC web app (server-rendered Razor views, Entity Framework models, and MVC controllers).
 
-Welcome to GameHub-store — a sleek, modern storefront for discovering and buying games. Fast, responsive, and delightful to use. Whether you're browsing indie gems or AAA titles, GameHub-store makes it easy to find your next favorite. 🚀
+Status: DRAFT — review configuration, secrets, and deployment before publishing to production.
 
-Demo
-----
-> Live demo: https://your-demo-url.example (replace with your live link)
+---
 
-![screenshot](docs/demo.png)  
-*Screenshot: replace docs/demo.png with an actual screenshot or gif to showcase the UI.*
+## Table of contents
+- [Features](#features)
+- [Tech stack](#tech-stack)
+- [Prerequisites](#prerequisites)
+- [Quick local run](#quick-local-run)
+- [Database](#database)
+- [Authentication & Google OAuth](#authentication--google-oauth)
+- [Security notes](#security-notes)
+- [Project structure (relevant)](#project-structure-relevant)
+- [Publishing & deployment](#publishing--deployment)
+- [Contributing](#contributing)
+- [Roadmap](#roadmap)
+- [License](#license)
+- [Contact](#contact)
 
-Why GameHub-store? 💡
----------------------
-- Fast, responsive UI focused on games and visual storytelling 🎨
-- Easy search, filters, and category browsing 🔎
-- Clean game detail pages with gallery, description, and specs 🖼️
-- Smooth shopping cart flow with quantity and pricing summary 🧾
-- Built with extendability and good DX in mind (components, services, tests) 🧩
+---
 
-Key Features ✨
---------------
-- Browse latest & featured games
-- Search by name, genre, or tag
-- Filters: genre, platform, price, release date
-- Game detail view: screenshots, description, system reqs
-- Cart with add/remove/update item quantity
-- Authentication scaffolding (optional)
-- Mobile-first responsive layout
+## Features
+- Game catalog with genres, filters and pagination
+- Product detail pages with screenshots and metadata
+- Search and pagination for large catalogs
+- Wishlist / library management for users
+- User registration, login, and profile management
+- Admin area with CRUD for games, discounts, and users
+- Entity Framework 6 for data access (Database-first or Code-first)
+- OWIN middleware for external authentication (Google OAuth)
 
-Tech Stack (example)
---------------------
-- Frontend: React + Vite (or Next.js) ⚛️
-- Styling: Tailwind CSS / styled-components 🎨
-- State: Context API / Redux / Zustand 🧠
-- Backend: Node.js + Express / Next API routes / Firebase (optional) 🔌
-- Testing: Jest + React Testing Library ✅
+---
 
-Replace the above with the exact stack used in your repo.
+## Tech stack
+- Backend / UI: ASP.NET MVC 5 on .NET Framework 4.8  
+- ORM: Entity Framework 6  
+- Authentication: Session-based auth, optional OWIN Google OAuth  
+- Database: SQL Server / LocalDB  
+- Frontend: Razor views, Bootstrap, jQuery  
+- Dev tooling: Visual Studio 2019 / 2022, NuGet
 
-Quick Start 🚀
--------------
-Prereqs:
-- Node.js >= 16
-- npm or yarn
+---
 
-1) Clone
-   git clone https://github.com/Abdul-Rafy2005/GameHub-store.git
+## Prerequisites
+- Visual Studio 2019 or 2022 (ASP.NET workload installed)  
+- .NET Framework 4.8 installed  
+- SQL Server or LocalDB instance  
+- NuGet package restore enabled
 
-2) Install
-   cd GameHub-store
-   npm install
-   # or
-   yarn
+---
 
-3) Environment
-Create a .env file in the root with required variables, e.g.:
-- REACT_APP_API_URL=https://api.example.com
-- NEXT_PUBLIC_API_KEY=your_key_here
+## Quick local run
 
-4) Run (development)
-   npm run dev
-   # or
-   yarn dev
-
-5) Build / Start
-   npm run build
-   npm start
-   # or
-   yarn build && yarn start
-
-6) Tests
-   npm test
-   # or
-   yarn test
-
-Project Structure (suggested)
------------------------------
-- src/
-  - components/    — Reusable UI components
-  - pages/         — Page / route components
-  - services/      — API wrappers and data fetching
-  - store/         — State management
-  - styles/        — Theme and global styles
-  - assets/        — Images, icons
-- public/ or static/
-- docs/            — Screenshots / demos
-- package.json
-- vite.config.js / next.config.js
-
-Style & UX Notes
-----------------
-- Mobile-first design — prioritize speed and touch interactions 📱
-- Use high-quality cover art for games with lazy-loading for performance 🖼️
-- Accessible color contrast and keyboard navigation ♿
-
-Contributing 🤝
---------------
-Contributions are very welcome — thank you!  
-1. Fork the repo  
-2. Create a branch: git checkout -b feat/your-feature  
-3. Commit: git commit -m "feat: add awesome feature"  
-4. Push: git push origin feat/your-feature  
-5. Open a PR and describe your changes
-
-Please follow the code style and include tests for important behavior.
-
-Roadmap / Ideas 🛣️
-------------------
-- User reviews & ratings ⭐
-- Persistent cart (localStorage/backend)
-- Recommendation engine (simple ML / heuristics)
-- Payment integration (Stripe / PayPal)
-- Performance tuning & Lighthouse improvements
-
-License
--------
-MIT © Abdul-Rafy2005 — see LICENSE for details.
-
-Credits & Assets
-----------------
-Icons and images should be credited here (e.g., game cover art sources, icon packs).
-
-Contact
--------
-Abdul Rafy — https://github.com/Abdul-Rafy2005  
-Email: your.email@example.com
-
-Need it customized?
--------------------
-If you paste your package.json, tell me the frameworks used (React/Next/Vite/Node/etc.), and add any screenshots or a demo link, I will update this README to use exact commands, real badges, and images and can push the file into your repo.
+1. Clone the repository:
+```bash
+git clone https://github.com/Abdul-Rafy2005/GameHub-store.git
+cd GameHub-store
 ```
+
+2. Restore NuGet packages:  
+Open the solution (`.sln`) in Visual Studio — NuGet restore will run automatically. Or from the command line:
+```bash
+nuget restore GameHub.sln
+```
+
+3. Update connection string:  
+Edit `Web.config` and set the connection string named `GameManagementMISEntities` to point at your SQL Server / LocalDB instance.
+
+4. Build & run:
+- In Visual Studio: set the web project as Startup Project, choose Debug or Release, press F5 (IIS Express) or Ctrl+F5.
+- Confirm the app runs at the IIS Express URL shown in the toolbar.
+
+---
+
+## Database
+- The project uses EF models in the `Models` folder and expects a connection string named `GameManagementMISEntities` in `Web.config`.
+- If using Database-First: ensure the database schema exists and matches the EDMX / model.
+- If using Code-First: use your preferred EF migrations or seeding approach to create and seed the database.
+- For quick seeding, add SQL scripts or seed logic and run them against your database.
+
+---
+
+## Authentication & Google OAuth
+- OWIN Google OAuth is configured in `App_Start/Startup.cs`.
+- For local development you may store Google client ID/secret in `Web.config` (appSettings) — do NOT commit secrets to source control.
+- For production, store secrets in environment variables or the host's configuration (IIS App Settings).
+- Callback path: `/signin-google` — ensure this is configured in the Google Cloud Console.
+
+---
+
+## Security notes
+- Remove or avoid known vulnerable packages (e.g., outdated OWIN/Identity packages). Use minimal required OWIN packages for Google OAuth.
+- Never commit secrets (Google client secret, DB passwords) to the repo.
+- Use HTTPS in production and set cookies as Secure and HttpOnly.
+- Verify how password hashes are implemented; ensure modern hashing (bcrypt/argon2). The project stores a PasswordHash field — review before production.
+- Keep packages up to date and review advisories (NuGet security advisories).
+
+---
+
+## Project structure (relevant)
+- Controllers/ — MVC controllers (Games, Discounts, Account, Admin, etc.)
+- Models/ — Entity Framework models and DbContext
+- Views/ — Razor views and shared layouts
+- Content/ — CSS, images, cover art and banners
+- Scripts/ — client-side scripts (jQuery, Bootstrap)
+- App_Start/ — OWIN Startup, routing, bundles
+- Global.asax — application lifecycle events
+- Web.config — site configuration, app settings and connection strings
+
+---
+
+## Publishing & deployment (high level)
+1. Build in Release configuration.
+2. Publish the web project (Visual Studio → Publish → File System or Web Deploy).
+3. Deploy the publish output to IIS, including:
+   - bin/ (assemblies)
+   - Views/
+   - Content/ (CSS/images)
+   - Global.asax
+   - Web.config (transform for production; set compilation debug="false")
+4. Configure IIS:
+   - App Pool: .NET CLR v4.0, Integrated pipeline
+   - Provide environment variables or App Settings for Google client secrets and connection strings
+5. Ensure production URLs are registered in Google Cloud Console for OAuth redirect (e.g., https://yourdomain.com/signin-google).
+
+---
+
+## Contributing
+- Fork → feature branch → open a pull request.
+- Keep sensitive data out of commits.
+- Add tests for non-trivial logic where possible.
+
+---
+
+## Roadmap
+- Harden authentication flows and secret management
+- Add unit & integration tests
+- Add CI for build & basic tests
+- Audit and update NuGet packages to address advisories
+
+---
+
+## License
+Add a LICENSE file (MIT or preferred) before publishing.
+
+---
+
+## Contact
+Maintainer: Abdul-Rafy2005 — https://github.com/Abdul-Rafy2005
+
+For issues or feature requests, please open an issue in this repository.
