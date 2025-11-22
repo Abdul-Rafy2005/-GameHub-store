@@ -57,7 +57,7 @@ Status: DRAFT — review configuration, secrets, and deployment before publishin
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/Abdul-Rafy2005/GameHub-store.git
+git clone https://github.com/Abdul-Rafy2005/-GameHub-store.git
 cd GameHub-store
 ```
 
