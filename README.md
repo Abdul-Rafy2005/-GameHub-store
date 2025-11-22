@@ -159,14 +159,6 @@ If you later add a separate frontend or an API microservice, add dedicated docs 
 
 ---
 
-## License
-Add a LICENSE file (MIT or Apache-2.0 recommended) before publishing.  
-- MIT = permissive, simple (good for broad reuse).  
-- Apache-2.0 = permissive + explicit patent grant.  
-An MIT LICENSE file is provided below — copy it to LICENSE at the repo root.
-
----
-
 ## Contact
 Maintainer: Abdul-Rafy2005 — https://github.com/Abdul-Rafy2005
 
